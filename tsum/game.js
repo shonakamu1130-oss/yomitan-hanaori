@@ -1,13 +1,13 @@
 /**
  * 読谷山花織ツムツム (Yomitan Hanaori Tsum Tsum Mobile Puzzle)
- * Core Game Engine: Custom 2D Physics, Touch Thread Dragging, Synthesizer Audio & Web Canvas Renderer
+ * Core Game Engine: Custom 2D Physics, Real Textile Image Rendering, Touch Thread Dragging, Synthesizer Audio & Web Canvas Renderer
  */
 
 (function () {
   'use strict';
 
   /* ==========================================================================
-     1. Motif Definitions & SVG / Canvas Path Definitions
+     1. Motif Definitions & Image Preloader
      ========================================================================== */
   const MOTIFS = {
     jinbana: {
@@ -18,6 +18,8 @@
       color: '#f5b82e',
       darkColor: '#b37e09',
       bgColor: '#3d2d0c',
+      imgSrc: 'images/jinbana.png',
+      img: null,
       lore: '貨幣（コイン）を模した幾何学菱形文様。子孫繁栄と商売繁盛、富をもたらす縁起物です。'
     },
     osaibana: {
@@ -28,6 +30,8 @@
       color: '#e63928',
       darkColor: '#961d12',
       bgColor: '#3d0c0c',
+      imgSrc: 'images/osaibana.png',
+      img: null,
       lore: '風車の形をした風雅な花文様。家庭が絶え間なく円満で平和であり続けることを祈願しています。'
     },
     umanoashi: {
@@ -38,6 +42,8 @@
       color: '#1cb896',
       darkColor: '#0e6955',
       bgColor: '#0c3d32',
+      imgSrc: 'images/umanoashi.png',
+      img: null,
       lore: '馬の足跡を模した連鎖ステップ文様。道中の無事安全と、一歩一歩の着実な前進を祈願します。'
     },
     hanasashi: {
@@ -48,6 +54,8 @@
       color: '#e63988',
       darkColor: '#961c54',
       bgColor: '#3d0c2c',
+      imgSrc: 'images/hanasashi.png',
+      img: null,
       lore: '十字の刺し子風幾何学花文様。悪霊を祓う魔除けと愛情が込められています。'
     },
     kashiradaka: {
@@ -58,11 +66,21 @@
       color: '#eef2f7',
       darkColor: '#94a3b8',
       bgColor: '#2d3440',
+      imgSrc: 'images/kashiradaka.png',
+      img: null,
       lore: '夜空に輝く一番星をかたどった八角花文様。琉球王府の貴族が愛用した最高格式の紋様です。'
     }
   };
 
   const MOTIF_KEYS = Object.keys(MOTIFS);
+
+  // Preload authentic Yomitan Hanaori textile images
+  MOTIF_KEYS.forEach(key => {
+    const m = MOTIFS[key];
+    const image = new Image();
+    image.src = m.imgSrc;
+    m.img = image;
+  });
 
   /* ==========================================================================
      2. Web Audio Synthesizer (Zero Audio File Dependency)
@@ -303,7 +321,6 @@
     }
 
     bindEvents() {
-      // Touch & Mouse Listeners for smooth swipe connecting
       const getPos = (e) => {
         const rect = this.canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -367,16 +384,29 @@
 
       document.getElementById('btnSkill').addEventListener('click', () => this.triggerSkill());
 
-      // Modals
+      // Modals Setup
       const setupModal = (btnId, modalId, closeId) => {
         const modal = document.getElementById(modalId);
-        const open = () => modal.classList.add('active');
-        const close = () => modal.classList.remove('active');
-        
+        if (!modal) return;
+
+        const open = () => {
+          modal.classList.remove('hidden');
+          modal.classList.add('active');
+        };
+        const close = () => {
+          modal.classList.remove('active');
+          modal.classList.add('hidden');
+        };
+
         const b = document.getElementById(btnId);
         if (b) b.addEventListener('click', open);
         const c = document.getElementById(closeId);
         if (c) c.addEventListener('click', close);
+
+        // Click backdrop to close
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) close();
+        });
       };
 
       setupModal('btnGallery', 'galleryModal', 'btnCloseGallery');
@@ -393,9 +423,12 @@
       if (!container) return;
       container.innerHTML = '';
       MOTIF_KEYS.forEach(key => {
+        const m = MOTIFS[key];
         const item = document.createElement('div');
         item.className = 'motif-circle-item';
-        item.innerHTML = this.getMotifSvgString(key, 32);
+        item.style.backgroundImage = `url(${m.imgSrc})`;
+        item.style.backgroundSize = 'cover';
+        item.style.backgroundPosition = 'center';
         container.appendChild(item);
       });
     }
@@ -409,8 +442,7 @@
         const card = document.createElement('div');
         card.className = 'gallery-item-card';
         card.innerHTML = `
-          <div class="gallery-item-svg">
-            ${this.getMotifSvgString(key, 44)}
+          <div class="gallery-item-svg" style="background-image: url(${m.imgSrc}); background-size: cover; background-position: center;">
           </div>
           <div class="gallery-item-info">
             <div class="gallery-item-name">${m.name} (${m.reading})</div>
@@ -423,40 +455,12 @@
     }
 
     renderSkillIcon() {
-      const svg = document.getElementById('skillIconSvg');
-      if (svg) svg.innerHTML = this.getMotifSvgString('kashiradaka', 40);
-    }
-
-    getMotifSvgString(key, size = 40) {
-      const m = MOTIFS[key] || MOTIFS.jinbana;
-      const c = m.color;
-      let inner = '';
-
-      if (key === 'jinbana') {
-        inner = `<polygon points="20,4 36,20 20,36 4,20" fill="none" stroke="${c}" stroke-width="3"/>
-                 <polygon points="20,10 30,20 20,30 10,20" fill="none" stroke="${c}" stroke-width="1.5" stroke-dasharray="2 2"/>
-                 <circle cx="20" cy="20" r="3" fill="${c}"/>`;
-      } else if (key === 'osaibana') {
-        inner = `<circle cx="20" cy="20" r="4" fill="${c}"/>
-                 <path d="M20 20 L20 6 Q27 10 20 20 Z" fill="${c}"/>
-                 <path d="M20 20 L34 20 Q30 27 20 20 Z" fill="${c}"/>
-                 <path d="M20 20 L20 34 Q13 30 20 20 Z" fill="${c}"/>
-                 <path d="M20 20 L6 20 Q10 13 20 20 Z" fill="${c}"/>`;
-      } else if (key === 'umanoashi') {
-        inner = `<path d="M8 32 L8 24 L16 24 L16 16 L24 16 L24 8 L32 8" fill="none" stroke="${c}" stroke-width="3.5" stroke-linecap="square"/>
-                 <path d="M14 32 L14 28 L22 28 L22 20 L30 20" fill="none" stroke="${c}" stroke-width="1.5"/>`;
-      } else if (key === 'hanasashi') {
-        inner = `<line x1="20" y1="4" x2="20" y2="36" stroke="${c}" stroke-width="3"/>
-                 <line x1="4" y1="20" x2="36" y2="20" stroke="${c}" stroke-width="3"/>
-                 <circle cx="10" cy="10" r="2.5" fill="${c}"/><circle cx="30" cy="10" r="2.5" fill="${c}"/>
-                 <circle cx="10" cy="30" r="2.5" fill="${c}"/><circle cx="30" cy="30" r="2.5" fill="${c}"/>`;
-      } else {
-        // kashiradaka (Ryukyu Star)
-        inner = `<polygon points="20,4 25,14 36,20 25,26 20,36 15,26 4,20 15,14" fill="none" stroke="${c}" stroke-width="2.5"/>
-                 <circle cx="20" cy="20" r="3" fill="${c}"/>`;
+      const avatar = document.querySelector('.skill-avatar');
+      if (avatar) {
+        avatar.style.backgroundImage = `url(images/kashiradaka.png)`;
+        avatar.style.backgroundSize = 'cover';
+        avatar.style.backgroundPosition = 'center';
       }
-
-      return `<svg viewBox="0 0 40 40" width="${size}" height="${size}">${inner}</svg>`;
     }
 
     startGame() {
@@ -477,9 +481,17 @@
       this.maxChain = 0;
       this.totalCleared = 0;
 
-      document.getElementById('startOverlay').classList.remove('active');
-      document.getElementById('resultOverlay').classList.add('hidden');
-      document.getElementById('pauseOverlay').classList.add('hidden');
+      const startModal = document.getElementById('startOverlay');
+      startModal.classList.remove('active');
+      startModal.classList.add('hidden');
+
+      const resModal = document.getElementById('resultOverlay');
+      resModal.classList.remove('active');
+      resModal.classList.add('hidden');
+
+      const pauseModal = document.getElementById('pauseOverlay');
+      pauseModal.classList.remove('active');
+      pauseModal.classList.add('hidden');
 
       // Initial fill of Tsums
       for (let i = 0; i < 40; i++) {
@@ -497,13 +509,17 @@
     pauseGame() {
       if (this.state !== 'PLAYING') return;
       this.state = 'PAUSED';
-      document.getElementById('pauseOverlay').classList.remove('hidden');
+      const p = document.getElementById('pauseOverlay');
+      p.classList.remove('hidden');
+      p.classList.add('active');
     }
 
     resumeGame() {
       if (this.state !== 'PAUSED') return;
       this.state = 'PLAYING';
-      document.getElementById('pauseOverlay').classList.add('hidden');
+      const p = document.getElementById('pauseOverlay');
+      p.classList.remove('active');
+      p.classList.add('hidden');
       this.lastTime = performance.now();
       requestAnimationFrame((t) => this.loop(t));
     }
@@ -538,7 +554,9 @@
       document.getElementById('resultStars').textContent = stars;
 
       this.drawResultCloth();
-      document.getElementById('resultOverlay').classList.remove('hidden');
+      const res = document.getElementById('resultOverlay');
+      res.classList.remove('hidden');
+      res.classList.add('active');
     }
 
     drawResultCloth() {
@@ -548,15 +566,13 @@
       ctx.fillStyle = '#0d1726';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw custom woven stripe pattern
-      const colors = ['#f5b82e', '#e63928', '#1cb896', '#e63988', '#eef2f7'];
-      for (let x = 10; x < canvas.width; x += 24) {
-        const color = colors[(x / 24) % colors.length];
-        ctx.fillStyle = color;
-        ctx.fillRect(x, 10, 12, canvas.height - 20);
-
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(x + 4, 15, 4, canvas.height - 30);
+      const keys = MOTIF_KEYS;
+      for (let x = 10; x < canvas.width; x += 50) {
+        const k = keys[Math.floor((x / 50) % keys.length)];
+        const m = MOTIFS[k];
+        if (m && m.img && m.img.complete) {
+          ctx.drawImage(m.img, x, 10, 40, 70);
+        }
       }
     }
 
@@ -577,40 +593,34 @@
         vy: initial ? 0 : Math.random() * 2,
         radius: radius,
         motifKey: key,
-        special: null, // 'bomb', 'big'
+        special: null,
         rotation: Math.random() * Math.PI * 2,
-        rvel: (Math.random() - 0.5) * 0.05
+        rvel: (Math.random() - 0.5) * 0.03
       });
     }
 
-    /* ==========================================================================
-       Physics Loop & Circle Collision Resolution
-       ========================================================================== */
     updatePhysics() {
       const gravityX = this.gravityX;
       const gravityY = this.gravityY;
       const floorY = this.height - 20;
 
-      // Keep spawning if count drops below target
       if (this.tsums.length < 42 && Math.random() < 0.2) {
         this.spawnTsum();
       }
 
-      // Update position & rotation
       for (let i = 0; i < this.tsums.length; i++) {
         const t = this.tsums[i];
 
         t.vx += gravityX;
         t.vy += gravityY;
 
-        t.vx *= 0.98; // Friction
+        t.vx *= 0.98;
         t.vy *= 0.98;
 
         t.x += t.vx;
         t.y += t.vy;
         t.rotation += t.rvel;
 
-        // Container Side Boundaries (Slanted Bowl Effect)
         const leftWall = t.radius + 8;
         const rightWall = this.width - t.radius - 8;
 
@@ -622,7 +632,6 @@
           t.vx *= -0.3;
         }
 
-        // Bowl Bottom Floor Collision
         if (t.y > floorY - t.radius) {
           t.y = floorY - t.radius;
           t.vy *= -0.2;
@@ -630,7 +639,6 @@
         }
       }
 
-      // Circle-Circle Rigid Collision Resolution (Multiple Iterations for stability)
       for (let iter = 0; iter < 3; iter++) {
         for (let i = 0; i < this.tsums.length; i++) {
           for (let j = i + 1; j < this.tsums.length; j++) {
@@ -649,14 +657,12 @@
               const nx = dx / dist;
               const ny = dy / dist;
 
-              // Separate overlap
               const separation = overlap * 0.5;
               a.x -= nx * separation;
               a.y -= ny * separation;
               b.x += nx * separation;
               b.y += ny * separation;
 
-              // Relative velocity
               const rvx = b.vx - a.vx;
               const rvy = b.vy - a.vy;
 
@@ -675,11 +681,7 @@
       }
     }
 
-    /* ==========================================================================
-       Chain Connection & Swipe Logic
-       ========================================================================== */
     tryAddToChain(pos) {
-      // Find candidate Tsum near touch pointer
       let candidate = null;
       let minDist = 999;
 
@@ -697,7 +699,6 @@
 
       if (!candidate) return;
 
-      // First item in chain
       if (this.chain.length === 0) {
         this.chain.push(candidate);
         audio.playTone(0);
@@ -705,18 +706,15 @@
         return;
       }
 
-      // Check if candidate is already last in chain (do nothing)
       const last = this.chain[this.chain.length - 1];
       if (candidate.id === last.id) return;
 
-      // Undo chain if backing up to second to last item
       if (this.chain.length > 1 && candidate.id === this.chain[this.chain.length - 2].id) {
         this.chain.pop();
         audio.playTone(this.chain.length - 1);
         return;
       }
 
-      // Check matching motif & proximity to last item
       if (!this.chain.some(item => item.id === candidate.id)) {
         if (candidate.motifKey === last.motifKey || candidate.special === 'bomb') {
           const dx = candidate.x - last.x;
@@ -728,7 +726,6 @@
             audio.playTone(this.chain.length - 1);
             this.createSparks(candidate.x, candidate.y, candidate.motifKey, 6);
 
-            // Haptic vibration if supported
             if (navigator.vibrate) navigator.vibrate(12);
           }
         }
@@ -744,21 +741,18 @@
         this.totalCleared += count;
         if (count > this.maxChain) this.maxChain = count;
 
-        // Score calculation
         const feverMult = this.isFever ? 3 : 1;
         const earnedScore = count * 120 * (1 + (count - 3) * 0.3) * feverMult;
         this.score += Math.floor(earnedScore);
 
         this.addFloatingText(`+${Math.floor(earnedScore)}`, lastTsum.x, lastTsum.y, '#f5b82e');
 
-        // Combo & Fever
         this.combo++;
         this.showCombo(this.combo);
 
         this.chargeFever(count * 4.5);
         this.chargeSkill(count * 5);
 
-        // Remove cleared Tsums & spawn particles
         this.chain.forEach(t => {
           this.createSparks(t.x, t.y, t.motifKey, t.special === 'big' ? 24 : 12);
           audio.playPop(t.special === 'big');
@@ -771,7 +765,6 @@
           if (idx !== -1) this.tsums.splice(idx, 1);
         });
 
-        // Spawn Bomb if chain >= 7
         if (count >= 7) {
           this.spawnBombTsum(lastTsum.x, lastTsum.y);
         } else if (count >= 10) {
@@ -790,7 +783,6 @@
       audio.playBomb();
       this.createSparks(bombTsum.x, bombTsum.y, 'jinbana', 30);
 
-      // Destroy nearby Tsums
       const radius = 90;
       const toRemove = [];
 
@@ -859,7 +851,7 @@
       this.feverGauge = 100;
       this.feverTimer = 10;
       this.feverCount++;
-      this.timeLeft += 5; // Bonus time
+      this.timeLeft += 5;
 
       audio.playFeverSound();
 
@@ -896,7 +888,6 @@
       this.skillGauge = 0;
       this.chargeSkill(0);
 
-      // Clear center Tsums & spawn bombs
       const centerX = this.width / 2;
       const centerY = this.height / 2;
 
@@ -969,9 +960,6 @@
       document.getElementById('feverFill').style.width = `${this.feverGauge}%`;
     }
 
-    /* ==========================================================================
-       Rendering Loop
-       ========================================================================== */
     loop(timestamp) {
       if (this.state !== 'PLAYING') return;
 
@@ -985,18 +973,14 @@
       const ctx = this.ctx;
       ctx.clearRect(0, 0, this.width, this.height);
 
-      // Render Curved Bowl Glass Container
       this.drawBowlContainer(ctx);
 
-      // Render Tsums
       for (let i = 0; i < this.tsums.length; i++) {
         this.drawTsum(ctx, this.tsums[i]);
       }
 
-      // Render Swipe Thread Chain Line
       this.drawChainThread(ctx);
 
-      // Render Particles
       for (let i = this.particles.length - 1; i >= 0; i--) {
         const p = this.particles[i];
         p.x += p.vx;
@@ -1018,7 +1002,6 @@
         ctx.restore();
       }
 
-      // Render Floating Text
       for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
         const ft = this.floatingTexts[i];
         ft.y += ft.vy;
@@ -1062,40 +1045,69 @@
       ctx.translate(t.x, t.y);
       ctx.rotate(t.rotation);
 
-      // Tsum Base Circle Gradient
-      const grad = ctx.createRadialGradient(-t.radius * 0.3, -t.radius * 0.3, 2, 0, 0, t.radius);
-      grad.addColorStop(0, '#ffffff');
-      grad.addColorStop(0.3, m.color);
-      grad.addColorStop(1, m.darkColor);
-
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(0, 0, t.radius, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Selection Glow
-      if (isSelected) {
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 4;
-        ctx.shadowColor = '#ffffff';
-        ctx.shadowBlur = 12;
-        ctx.stroke();
-      } else {
-        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-      }
-
-      // Draw Motif Design
       if (t.special === 'bomb') {
-        // Bomb Pattern (Star Explosive)
-        ctx.fillStyle = '#f5b82e';
+        // Bomb Tsum
+        const grad = ctx.createRadialGradient(-t.radius * 0.3, -t.radius * 0.3, 2, 0, 0, t.radius);
+        grad.addColorStop(0, '#f5b82e');
+        grad.addColorStop(1, '#e63928');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(0, 0, t.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 22px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('💣', 0, 0);
+      } else if (m.img && m.img.complete && m.img.naturalWidth !== 0) {
+        // Real Yomitan Hanaori Textile Texture Image Rendering
+        ctx.beginPath();
+        ctx.arc(0, 0, t.radius, 0, Math.PI * 2);
+        ctx.clip();
+
+        // Draw textile pattern image centered inside circle
+        ctx.drawImage(m.img, -t.radius, -t.radius, t.radius * 2, t.radius * 2);
+
+        // 3D Cushion / Glass Bead Spherical Shading Overlay
+        const overlayGrad = ctx.createRadialGradient(-t.radius * 0.35, -t.radius * 0.35, 2, 0, 0, t.radius);
+        overlayGrad.addColorStop(0, 'rgba(255, 255, 255, 0.45)');
+        overlayGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
+        overlayGrad.addColorStop(0.85, 'rgba(0, 0, 0, 0.2)');
+        overlayGrad.addColorStop(1, 'rgba(0, 0, 0, 0.65)');
+
+        ctx.fillStyle = overlayGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, t.radius, 0, Math.PI * 2);
+        ctx.fill();
       } else {
+        // Fallback Vector Rendering
+        const grad = ctx.createRadialGradient(-t.radius * 0.3, -t.radius * 0.3, 2, 0, 0, t.radius);
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.3, m.color);
+        grad.addColorStop(1, m.darkColor);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(0, 0, t.radius, 0, Math.PI * 2);
+        ctx.fill();
+
         this.drawMotifCanvasPath(ctx, t.motifKey, t.radius * 0.65);
+      }
+
+      // Outer Gold / White Border Ring
+      ctx.beginPath();
+      ctx.arc(0, 0, t.radius, 0, Math.PI * 2);
+
+      if (isSelected) {
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 4.5;
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 14;
+        ctx.stroke();
+      } else {
+        ctx.strokeStyle = m.color || 'rgba(245,184,46,0.6)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
       }
 
       ctx.restore();
@@ -1115,22 +1127,10 @@
         ctx.lineTo(-half, 0);
         ctx.closePath();
         ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
-        ctx.fill();
       } else if (motifKey === 'osaibana') {
         ctx.beginPath();
         ctx.arc(0, 0, 3, 0, Math.PI * 2);
         ctx.fill();
-        for (let i = 0; i < 4; i++) {
-          ctx.rotate(Math.PI / 2);
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(0, -half);
-          ctx.quadraticCurveTo(half * 0.5, -half * 0.7, 0, 0);
-          ctx.fill();
-        }
       } else if (motifKey === 'umanoashi') {
         ctx.beginPath();
         ctx.moveTo(-half, half);
@@ -1147,17 +1147,8 @@
         ctx.lineTo(0, half);
         ctx.stroke();
       } else {
-        // kashiradaka (Star)
         ctx.beginPath();
-        for (let i = 0; i < 8; i++) {
-          const r = i % 2 === 0 ? half : half * 0.45;
-          const a = (i * Math.PI) / 4;
-          const px = Math.cos(a) * r;
-          const py = Math.sin(a) * r;
-          if (i === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-        }
-        ctx.closePath();
+        ctx.arc(0, 0, half * 0.5, 0, Math.PI * 2);
         ctx.stroke();
       }
     }
@@ -1180,14 +1171,12 @@
         else ctx.lineTo(t.x, t.y);
       }
 
-      // Connect to active touch pointer
       if (this.isPointerDown) {
         ctx.lineTo(this.pointerPos.x, this.pointerPos.y);
       }
 
       ctx.stroke();
 
-      // Inner glowing white core thread
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 2.5;
       ctx.shadowBlur = 0;
@@ -1197,7 +1186,6 @@
     }
   }
 
-  // Initialize Engine when DOM is ready
   window.addEventListener('DOMContentLoaded', () => {
     new GameEngine();
   });
