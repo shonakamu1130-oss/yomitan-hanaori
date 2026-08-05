@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>読谷山花織ツムツム - 沖縄伝統工芸パズル</title>
+  <meta name="description" content="沖縄の伝統工芸「読谷山花織」をテーマにした、爽快な物理ツムツム風パズルゲーム。なぞって消す糸結びパズル！">
+  <meta name="theme-color" content="#0d1726">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="花織ツムツム">
+  <link rel="manifest" href="manifest.json">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Yuji+Syuku&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Dynamic Ambient Canvas Background -->
+  <canvas id="bgCanvas"></canvas>
+
+  <div id="appContainer">
+    <!-- Top HUD Bar -->
+    <header class="hud-header">
+      <div class="hud-top-row">
+        <button id="btnSound" class="hud-circle-btn" aria-label="音声を切替" title="効果音・BGM切替">
+          <span id="soundIcon">🔊</span>
+        </button>
+        <div class="score-display">
+          <span class="score-label">SCORE</span>
+          <span id="valScore" class="score-value">0</span>
+        </div>
+        <button id="btnPause" class="hud-circle-btn" aria-label="一時停止" title="一時停止">
+          <span>⏸️</span>
+        </button>
+      </div>
+
+      <!-- Time & Fever Gauge -->
+      <div class="hud-status-row">
+        <div class="timer-badge">
+          <span class="timer-icon">⏳</span>
+          <span id="valTime" class="timer-value">60</span><span class="timer-unit">s</span>
+        </div>
+
+        <div class="fever-container">
+          <div class="fever-bar-bg">
+            <div id="feverFill" class="fever-bar-fill" style="width: 0%;"></div>
+            <div class="fever-text" id="feverText">FEVER</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Game Play Area -->
+    <main class="game-viewport">
+      <!-- Floating Canvas for Physics Tsums & Thread Drag Lines -->
+      <div class="canvas-wrapper">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- Animated Canvas Overlay for Score Floats & Combos -->
+        <div id="comboBanner" class="combo-banner hidden">
+          <span id="comboCount" class="combo-num">3</span>
+          <span class="combo-unit">連鎖！</span>
+        </div>
+
+        <!-- Fever Mode Screen Flash Banner -->
+        <div id="feverBanner" class="fever-banner hidden">
+          <div class="fever-glow-text">✨ FEVER TIME! ✨</div>
+        </div>
+      </div>
+
+      <!-- Bottom Skill & Item Bar -->
+      <footer class="game-footer">
+        <button id="btnSkill" class="skill-btn" disabled>
+          <div class="skill-avatar">
+            <svg id="skillIconSvg" viewBox="0 0 80 80" width="44" height="44"></svg>
+          </div>
+          <div class="skill-info">
+            <span class="skill-title">琉球星の導き</span>
+            <span class="skill-sub">タッチで全消去！</span>
+          </div>
+          <div class="skill-progress-ring">
+            <div id="skillFill" class="skill-fill-bar"></div>
+          </div>
+        </button>
+
+        <button id="btnGallery" class="footer-icon-btn" title="花織図鑑">
+          <span>🎴</span>
+          <span class="btn-lbl">図鑑</span>
+        </button>
+
+        <button id="btnHelp" class="footer-icon-btn" title="遊び方解説">
+          <span>📜</span>
+          <span class="btn-lbl">解説</span>
+        </button>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Start Screen Overlay -->
+  <div id="startOverlay" class="modal-overlay active">
+    <div class="start-card glass-modal">
+      <div class="title-badge">沖縄・読谷村 伝統工芸</div>
+      <h1 class="game-main-title">読谷山花織<br><span class="highlight-title">ツムツム</span></h1>
+      <p class="game-tagline">〜 幾何学模様を糸で結ぶ 爽快パズル 〜</p>
+
+      <div class="motifs-preview-row" id="motifsPreviewRow">
+        <!-- Motifs will be injected by JS -->
+      </div>
+
+      <div class="high-score-box">
+        <span class="hs-label">🏆 ハイスコア</span>
+        <span id="valHighScore" class="hs-val">0</span>
+      </div>
+
+      <button id="btnStart" class="primary-start-btn">
+        <span class="btn-sparkle">✨</span> ゲームスタート！ <span class="btn-sparkle">✨</span>
+      </button>
+
+      <div class="start-sub-actions">
+        <button id="btnOpenGalleryStart" class="secondary-btn">🎴 花織文様図鑑</button>
+        <button id="btnOpenHelpStart" class="secondary-btn">📜 遊び方・伝統解説</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over Result Overlay -->
+  <div id="resultOverlay" class="modal-overlay hidden">
+    <div class="result-card glass-modal">
+      <div class="result-header">
+        <h2 class="result-title">織り上がり！ (GAME OVER)</h2>
+        <div id="resultStars" class="result-stars">⭐⭐⭐</div>
+      </div>
+
+      <div class="result-cloth-preview">
+        <div class="cloth-frame">
+          <canvas id="resultClothCanvas" width="280" height="90"></canvas>
+        </div>
+        <div class="cloth-label" id="resultClothTitle">完成した帯: 「琉球錦花織」</div>
+      </div>
+
+      <div class="result-stats-grid">
+        <div class="res-stat-item">
+          <span class="res-lbl">最終スコア</span>
+          <span id="resScore" class="res-val highlight">0</span>
+        </div>
+        <div class="res-stat-item">
+          <span class="res-lbl">最大チェイン</span>
+          <span id="resMaxChain" class="res-val">0</span>
+        </div>
+        <div class="res-stat-item">
+          <span class="res-lbl">消去ツム数</span>
+          <span id="resClearedCount" class="res-val">0</span>
+        </div>
+        <div class="res-stat-item">
+          <span class="res-lbl">フィーバー回数</span>
+          <span id="resFeverCount" class="res-val">0</span>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button id="btnRetry" class="primary-start-btn">
+          <span>🔄</span> もう一度あそぶ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pause Overlay -->
+  <div id="pauseOverlay" class="modal-overlay hidden">
+    <div class="pause-card glass-modal">
+      <h2>⏸️ 一時停止中</h2>
+      <p>息抜き中... 再開ボタンを押してください。</p>
+      <div class="pause-actions">
+        <button id="btnResume" class="primary-start-btn">▶️ ゲーム再開</button>
+        <button id="btnRestartFromPause" class="secondary-btn">🔄 最初からやり直す</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Motifs Gallery Modal -->
+  <div id="galleryModal" class="modal-overlay hidden">
+    <div class="gallery-card glass-modal">
+      <div class="modal-header">
+        <h2>🎴 読谷山花織 幾何学文様図鑑</h2>
+        <button id="btnCloseGallery" class="close-btn">✕</button>
+      </div>
+      <div id="galleryList" class="gallery-content-scroll">
+        <!-- Injected dynamically via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Help / Lore Modal -->
+  <div id="helpModal" class="modal-overlay hidden">
+    <div class="help-card glass-modal">
+      <div class="modal-header">
+        <h2>📜 遊び方 & 読谷山花織とは</h2>
+        <button id="btnCloseHelp" class="close-btn">✕</button>
+      </div>
+      <div class="help-content-scroll">
+        <section class="help-section">
+          <h3>🎮 パズルの遊び方</h3>
+          <ol class="help-steps">
+            <li><strong>なぞってつなぐ:</strong> 画面内の同じ花織文様のツムを3個以上指でなぞってスワイプ！手を離すと爽快に消滅します。</li>
+            <li><strong>ロングチェイン:</strong> 7個以上繋げると周りを吹き飛ばす「ボム」が発生！10個以上で「巨大ツム」が登場。</li>
+            <li><strong>フィーバータイム:</strong> ツムを消してゲージが満タンになるとフィーバー！スコア3倍＆残り時間が延長！</li>
+            <li><strong>マイツムスキル:</strong> スキルゲージが溜まったらボタンをタップ！一括全消去スキルが発動します。</li>
+          </ol>
+        </section>
+
+        <section class="help-section">
+          <h3>🌺 読谷山花織（よみたんざんはなおり）の魅力</h3>
+          <p>
+            読谷山花織は、沖縄県読谷村で約600年の伝統を誇る琉球王国の浮織物です。
+            紋帳（設計図）を見ずに、糸を一本一本手作業で浮き出させて織り上げられる幾何学模様には、
+            商売繁盛や家庭円満、旅の無事などの深い祈りが込められています。
+          </p>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
