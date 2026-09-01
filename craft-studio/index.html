@@ -1,0 +1,2289 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>トントン織ろう！読谷山花織クラフトスタジオ</title>
+  <meta name="description" content="パズル感覚で読谷山花織の伝統紋様（銭花・風車・竹の節）をスマホでデザインしてコースターやストラップを作ろう！">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    /* 読谷山花織クラフトスタジオ スタイルシート */
+
+    :root {
+      /* 琉球伝統色彩トークン */
+      --color-ryukyu-aka: #D70035;    /* 緋色（赤） */
+      --color-ryukyu-ai: #003847;     /* 琉球藍（青） */
+      --color-fukugi-kiiro: #E9BC00;  /* 福木黄（黄） */
+      --color-gofun-shiro: #F5F5F0;   /* 胡粉白（白） */
+      --color-sumi-kuro: #1C1C1C;     /* 漆黒（黒） */
+      --color-moegi-midori: #3B7A57;  /* 萌黄（緑） */
+
+      /* UIテーマカラー */
+      --bg-dark-main: #141317;
+      --bg-card: rgba(36, 34, 42, 0.85);
+      --bg-card-border: rgba(255, 255, 255, 0.12);
+      --text-primary: #F5F5F0;
+      --text-secondary: #C0BDC7;
+      --accent-gold: #E9BC00;
+
+      --font-family: 'Zen Maru Gothic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark-main);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(215, 0, 53, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(233, 188, 0, 0.12) 0%, transparent 40%);
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: rgba(20, 19, 23, 0.95);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+      border-left: 1px solid var(--bg-card-border);
+      border-right: 1px solid var(--bg-card-border);
+    }
+
+    /* ヘッダー */
+    .app-header {
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--bg-card-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      font-size: 1.6rem;
+    }
+
+    .logo-group h1 {
+      font-size: 1.15rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: var(--color-gofun-shiro);
+    }
+
+    .logo-group h1 span {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--accent-gold);
+      font-weight: 700;
+    }
+
+    .icon-button {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .icon-button:active {
+      transform: scale(0.92);
+    }
+
+    /* モード切替タブ */
+    .view-tabs {
+      display: flex;
+      background: rgba(10, 10, 12, 0.6);
+      padding: 6px;
+      gap: 6px;
+      border-bottom: 1px solid var(--bg-card-border);
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 12px 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-family);
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .tab-button.active {
+      background: linear-gradient(135deg, var(--color-ryukyu-aka), #A00028);
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(215, 0, 53, 0.4);
+    }
+
+    /* メインセクション */
+    .main-content {
+      flex: 1;
+      padding: 16px;
+    }
+
+    .view-section {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .view-section.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* エディタ上部ツールバー */
+    .editor-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card);
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--bg-card-border);
+    }
+
+    .size-selector {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .size-selector .label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 700;
+    }
+
+    .btn-chip {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-primary);
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-family: var(--font-family);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-chip.active {
+      background: var(--accent-gold);
+      color: var(--color-sumi-kuro);
+      border-color: var(--accent-gold);
+    }
+
+    /* 左右対称トグルスイッチ */
+    .symmetry-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .symmetry-toggle input {
+      display: none;
+    }
+
+    .slider {
+      width: 38px;
+      height: 22px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 22px;
+      position: relative;
+      transition: 0.3s;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 3px;
+      top: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    .symmetry-toggle input:checked + .slider {
+      background-color: var(--color-ryukyu-aka);
+    }
+
+    .symmetry-toggle input:checked + .slider::before {
+      transform: translateX(16px);
+    }
+
+    .toggle-text {
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    /* マス目キャンバス */
+    .canvas-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0D0C0F;
+      padding: 12px;
+      border-radius: var(--radius-lg);
+      border: 2px solid rgba(233, 188, 0, 0.3);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+
+    #grid-canvas {
+      width: 100%;
+      max-width: 360px;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      border-radius: 8px;
+      touch-action: none;
+    }
+
+    /* アクションバー */
+    .action-bar {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-secondary, .btn-danger {
+      flex: 1;
+      padding: 10px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--bg-card-border);
+      font-family: var(--font-family);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:active {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .btn-danger {
+      background: rgba(215, 0, 53, 0.15);
+      color: #FF6B8B;
+      border-color: rgba(215, 0, 53, 0.3);
+    }
+
+    .btn-danger:active {
+      background: rgba(215, 0, 53, 0.3);
+    }
+
+    /* ツールボックス */
+    .toolbox {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .tool-group {
+      background: var(--bg-card);
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--bg-card-border);
+    }
+
+    .tool-group h3 {
+      font-size: 0.9rem;
+      color: var(--accent-gold);
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: #64B5F6;
+      font-family: var(--font-family);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* カラーパレット */
+    .palette-list {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .color-swatch {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+      position: relative;
+    }
+
+    .color-swatch.active {
+      transform: scale(1.18);
+      border-color: #FFFFFF;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    /* 紋様スタンプリスト */
+    .stamp-list {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .stamp-item {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-sm);
+      padding: 8px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .stamp-item .stamp-icon {
+      font-size: 1.4rem;
+    }
+
+    .stamp-item .stamp-name {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .stamp-item.active {
+      background: rgba(233, 188, 0, 0.2);
+      border-color: var(--accent-gold);
+      transform: translateY(-2px);
+    }
+
+    /* テンプレートボタン */
+    .template-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-template {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-primary);
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-family);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-template:active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* PREVIEW SECTION */
+    .product-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .product-selector .label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+    }
+
+    .product-chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .product-chip {
+      white-space: nowrap;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-family: var(--font-family);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .product-chip.active {
+      background: linear-gradient(135deg, var(--color-ryukyu-aka), #A00028);
+      border-color: var(--color-ryukyu-aka);
+      box-shadow: 0 4px 12px rgba(215, 0, 53, 0.4);
+    }
+
+    /* 視点モード切替ボタン */
+    .view-mode-selector {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 4px;
+      border-radius: 30px;
+      border: 1px solid var(--bg-card-border);
+      margin-bottom: 4px;
+    }
+
+    .btn-view-mode {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-family);
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-view-mode.active {
+      background: var(--accent-gold);
+      color: var(--color-sumi-kuro);
+      box-shadow: 0 2px 8px rgba(233, 188, 0, 0.4);
+    }
+
+    /* AI生成背景シーン選択バー */
+    .scene-selector-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 8px 0;
+      background: var(--bg-card);
+      padding: 10px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--accent-gold);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+
+    .scene-label {
+      font-size: 0.8rem;
+      color: var(--accent-gold);
+      font-weight: 700;
+    }
+
+    .scene-buttons {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-scene {
+      flex: 1;
+      padding: 8px 4px;
+      border: 1px solid var(--bg-card-border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      font-family: var(--font-family);
+      font-size: 0.78rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-scene.active {
+      background: linear-gradient(135deg, #004759, #2E8B57);
+      color: #FFFFFF;
+      border-color: var(--accent-gold);
+      box-shadow: 0 2px 8px rgba(0, 71, 89, 0.5);
+    }
+
+    /* AIリアルタイム背景生成ボタン */
+    .ai-action-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .btn-ai-sparkle {
+      width: 100%;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, #7928CA, #FF0080, #FF4D4D);
+      color: #FFFFFF;
+      border: 1px solid var(--accent-gold);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-family);
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(255, 0, 128, 0.4);
+      transition: all 0.2s;
+    }
+
+    .btn-ai-sparkle:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(255, 0, 128, 0.6);
+    }
+
+    .btn-ai-sparkle:active {
+      transform: scale(0.98);
+    }
+
+    .ai-status-text {
+      font-size: 0.75rem;
+      color: var(--accent-gold);
+      text-align: center;
+      font-weight: 600;
+      min-height: 1.2em;
+    }
+
+    .preview-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0B0A0D;
+      padding: 12px;
+      border-radius: var(--radius-lg);
+      border: 2px solid rgba(233, 188, 0, 0.4);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.8);
+    }
+
+    #preview-canvas {
+      width: 100%;
+      max-width: 380px;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--bg-card-border);
+    }
+
+    .info-card h3 {
+      color: var(--accent-gold);
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+
+    .info-card p {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .preview-actions {
+      display: flex;
+      margin-top: 8px;
+    }
+
+    .btn-primary-large {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #FFD700, #E9BC00, #C79E00);
+      color: var(--color-sumi-kuro);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-family);
+      font-size: 1.05rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(233, 188, 0, 0.6);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary-large:active {
+      transform: scale(0.97);
+    }
+
+    /* 図鑑モーダル */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-content {
+      background: #1D1B22;
+      border: 1px solid var(--accent-gold);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 440px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9);
+    }
+
+    .modal-header {
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.4);
+      border-bottom: 1px solid var(--bg-card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-size: 1rem;
+      color: var(--accent-gold);
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.8rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-body {
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .zukan-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--bg-card-border);
+      padding: 14px;
+      border-radius: var(--radius-md);
+      display: flex;
+      gap: 12px;
+    }
+
+    .zukan-icon {
+      font-size: 2.2rem;
+    }
+
+    .zukan-info h4 {
+      font-size: 1rem;
+      color: var(--color-gofun-shiro);
+      margin-bottom: 4px;
+    }
+
+    .zukan-info p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* フッター */
+    .app-footer {
+      padding: 16px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.4);
+      border-top: 1px solid var(--bg-card-border);
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app-container">
+
+    <!-- ヘッダー -->
+    <header class="app-header">
+      <div class="logo-group">
+        <span class="logo-icon">🌺</span>
+        <h1>読谷山花織 <span>クラフトスタジオ</span></h1>
+      </div>
+      <button id="btn-sound-toggle" class="icon-button" aria-label="効果音切替">
+        <span id="sound-icon">🔊</span>
+      </button>
+    </header>
+
+    <!-- モード切替タブ（デザイン / プレビュー） -->
+    <nav class="view-tabs" role="tablist">
+      <button id="tab-edit" class="tab-button active" role="tab" aria-selected="true">
+        ✏️ もようをつくる
+      </button>
+      <button id="tab-preview" class="tab-button" role="tab" aria-selected="false">
+        ✨ かんせいプレビュー
+      </button>
+    </nav>
+
+    <!-- メインコンテンツ領域 -->
+    <main class="main-content">
+
+      <!-- ================= DESIGN VIEW ================= -->
+      <section id="view-editor" class="view-section active">
+        
+        <!-- エディタ上部ツールバー -->
+        <div class="editor-toolbar">
+          <div class="size-selector">
+            <span class="label">マス目:</span>
+            <button class="btn-chip" data-size="8">8×8</button>
+            <button class="btn-chip active" data-size="12">12×12</button>
+            <button class="btn-chip" data-size="16">16×16</button>
+          </div>
+
+          <label class="symmetry-toggle">
+            <input type="checkbox" id="toggle-symmetry" checked>
+            <span class="slider"></span>
+            <span class="toggle-text">左右対称</span>
+          </label>
+        </div>
+
+        <!-- マス目キャンバス表示エリア (高精細720x720) -->
+        <div class="canvas-wrapper">
+          <canvas id="grid-canvas" width="720" height="720"></canvas>
+        </div>
+
+        <!-- 操作ボタン（やり直し・消去・図鑑） -->
+        <div class="action-bar">
+          <button id="btn-undo" class="btn-secondary">↩ 1つもどす</button>
+          <button id="btn-redo" class="btn-secondary">↪ やりなおす</button>
+          <button id="btn-clear" class="btn-danger">🗑 ぜんぶけす</button>
+        </div>
+
+        <!-- ツールボックス（カラー ＆ 紋様スタンプ） -->
+        <div class="toolbox">
+          <!-- 糸の色えらび -->
+          <div class="tool-group">
+            <h3>🎨 いとのいろ（単色）</h3>
+            <div id="color-palette" class="palette-list">
+              <!-- JSで動的生成 -->
+            </div>
+          </div>
+
+          <!-- 伝統紋様スタンプ -->
+          <div class="tool-group">
+            <div class="group-header">
+              <h3>🌺 でんとうのもよう（スタンプ）</h3>
+              <button id="btn-open-zukan" class="btn-link">📖 もよう図鑑をみる</button>
+            </div>
+            <div id="pattern-palette" class="stamp-list">
+              <!-- JSで動的生成 -->
+            </div>
+          </div>
+
+          <!-- かんたん見本テンプレート -->
+          <div class="tool-group">
+            <h3>⭐ かんたん見本テンプレート</h3>
+            <div class="template-list">
+              <button class="btn-template" data-template="jinbana_center">🌸 銭花を中心に配置</button>
+              <button class="btn-template" data-template="kajimaa_four">🌀 風車を四隅につける</button>
+              <button class="btn-template" data-template="diamond_all">菱形模様のお花畑</button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= PREVIEW VIEW ================= -->
+      <section id="view-preview-section" class="view-section">
+
+        <!-- 商品選択カルーセル -->
+        <div class="product-selector">
+          <span class="label">商品を選ぶ:</span>
+          <div id="product-list" class="product-chips">
+            <!-- JSで動的生成 -->
+          </div>
+        </div>
+
+        <!-- 視点モード切り替えボタン（正面平面 ⇄ 📷 本物の花織コレクション実写） -->
+        <div class="view-mode-selector">
+          <button id="btn-view-flat" class="btn-view-mode active">⬛ 正面（平面）表示</button>
+          <button id="btn-view-real" class="btn-view-mode">📷 本物の花織コレクション実写</button>
+        </div>
+
+        <!-- AI生成 実写背景シーン切り替えバー -->
+        <div id="scene-selector-wrapper" class="scene-selector-wrapper" style="display: none;">
+          <span class="scene-label">🎨 AI生成 背景シーンを選べるよ:</span>
+          <div class="scene-buttons">
+            <button class="btn-scene active" data-scene="ocean">🌊 海の見える窓辺</button>
+            <button class="btn-scene" data-scene="washitsu">🍵 和室ちゃぶ台</button>
+            <button class="btn-scene" data-scene="collection">🧵 花織コレクション</button>
+          </div>
+          <div class="ai-action-group">
+            <button id="btn-generate-ai" class="btn-ai-sparkle">
+              🤖 AIで新しい背景をリアルタイム生成する
+            </button>
+            <span id="ai-status-text" class="ai-status-text">✨ ボタンを押すとAIが新しい背景を生成します</span>
+          </div>
+        </div>
+
+        <!-- リアルプレビュー表示キャンバス (超高画質 1024x1024 HD レンダリング) -->
+        <div class="preview-wrapper">
+          <canvas id="preview-canvas" width="1024" height="1024"></canvas>
+        </div>
+
+        <!-- 商品解説カード -->
+        <div id="product-info-card" class="info-card">
+          <h3 id="product-title">コースター</h3>
+          <p id="product-desc">フリンジ（房）がついた温もりあふれる正方形コースター</p>
+        </div>
+
+        <!-- スマホ保存ボタン -->
+        <div class="preview-actions">
+          <button id="btn-download" class="btn-primary-large">
+            💾 スマホに画像として保存する
+          </button>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- モーダル：読谷山花織のもよう図鑑 -->
+    <div id="modal-zukan" class="modal-overlay" aria-hidden="true">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>📖 読谷山花織（よみたんざんはなおり）のもよう図鑑</h2>
+          <button id="btn-close-zukan" class="btn-close">&times;</button>
+        </div>
+        <div class="modal-body" id="zukan-body">
+          <!-- JSで伝統紋様の解説カードを挿入 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- フッター -->
+    <footer class="app-footer">
+      <p>沖縄県読谷村の伝統的工芸品「読谷山花織」デザイン体験アプリ</p>
+    </footer>
+
+  </div>
+
+  <!-- スタンドアロン実行スクリプト -->
+  <script>
+    // --- 1. PATTERNS DATA ---
+    const TRADITIONAL_COLORS = [
+      { id: 'aka', name: '琉球朱（あか）', hex: '#E60039', bg: '#E60039' },
+      { id: 'ai', name: '琉球藍（あい）', hex: '#004759', bg: '#004759' },
+      { id: 'fukugi', name: '福木黄（きいろ）', hex: '#FFC800', bg: '#FFC800' },
+      { id: 'gofun', name: '胡粉白（しろ）', hex: '#FFFFFF', bg: '#FFFFFF' },
+      { id: 'sumi', name: '漆黒（くろ）', hex: '#111111', bg: '#111111' },
+      { id: 'moegi', name: '萌黄（みどり）', hex: '#2E8B57', bg: '#2E8B57' },
+      { id: 'base_fabric', name: '地の布（ベース色）', hex: '#2E1A14', bg: '#2E1A14' }
+    ];
+
+    const TRADITIONAL_PATTERNS = [
+      {
+        id: 'jinbana',
+        name: '銭花（ジンバナ）',
+        meaning: 'お金の形をかたどった花紋様。「将来豊かな暮らしができますように」という願いが込められています。',
+        icon: '🌸',
+        size: 5,
+        matrix: [
+          [0, 1, 1, 1, 0],
+          [1, 0, 1, 0, 1],
+          [1, 1, 1, 1, 1],
+          [1, 0, 1, 0, 1],
+          [0, 1, 1, 1, 0]
+        ]
+      },
+      {
+        id: 'kajimaa',
+        name: '風車（カジマー）',
+        meaning: '沖縄で88歳のお祝いに使われる風車。「いつまでも健康で長生きしますように」という長寿の祈りです。',
+        icon: '🌀',
+        size: 5,
+        matrix: [
+          [1, 1, 0, 1, 0],
+          [0, 1, 0, 1, 1],
+          [1, 0, 1, 0, 1],
+          [1, 1, 0, 1, 0],
+          [0, 1, 0, 1, 1]
+        ]
+      },
+      {
+        id: 'takinohii',
+        name: '竹の節（タキノヒー）',
+        meaning: 'まっすぐ育つ竹の節。「子どもたちが竹のように強く健やかに成長しますように」という親の愛情です。',
+        icon: '🎋',
+        size: 5,
+        matrix: [
+          [1, 0, 0, 0, 1],
+          [1, 1, 1, 1, 1],
+          [0, 1, 1, 1, 0],
+          [1, 1, 1, 1, 1],
+          [1, 0, 0, 0, 1]
+        ]
+      },
+      {
+        id: 'hanaiti',
+        name: '花糸（ハナイティ）',
+        meaning: '小さなかわいいワンポイントの花。読谷山花織を華やかに彩る可憐なアクセント紋様です。',
+        icon: '✨',
+        size: 3,
+        matrix: [
+          [0, 1, 0],
+          [1, 1, 1],
+          [0, 1, 0]
+        ]
+      }
+    ];
+
+    const PRODUCTS = [
+      { id: 'coaster', name: 'コースター', desc: 'フリンジ（房）がついた温もりあふれる正方形コースター', icon: '☕' },
+      { id: 'strap', name: '携帯ストラップ', desc: 'スマートフォンの根付やキーホルダーにぴったりなスリム帯', icon: '📱' },
+      { id: 'bookmark', name: '織物しおり', desc: '読書やお勉強の時間を彩る上品なフリンジ付きしおり', icon: '🔖' },
+      { id: 'wallpaper', name: 'スマホ壁紙', desc: '自分の作例をスマホのロック画面・待ち受けに設定できる画像', icon: '🖼️' },
+      { id: 'mat', name: 'ランチョンマット', desc: 'テーブルを華やかに引き立てる少し大きめの織物マット', icon: '🍽️' }
+    ];
+
+    // --- 2. AUDIO MANAGER ---
+    class SoundManager {
+      constructor() {
+        this.audioCtx = null;
+        this.soundEnabled = true;
+      }
+      init() {
+        if (!this.audioCtx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.audioCtx = new AudioContext();
+        }
+        if (this.audioCtx && this.audioCtx.state === 'suspended') {
+          this.audioCtx.resume();
+        }
+      }
+      toggleSound() {
+        this.soundEnabled = !this.soundEnabled;
+        return this.soundEnabled;
+      }
+      playTonSound() {
+        if (!this.soundEnabled) return;
+        this.init();
+        if (!this.audioCtx) return;
+        try {
+          const ctx = this.audioCtx;
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(160 + Math.random() * 20, now);
+          osc.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } catch (e) {}
+      }
+      playFanfare() {
+        if (!this.soundEnabled) return;
+        this.init();
+        if (!this.audioCtx) return;
+        const ctx = this.audioCtx;
+        const now = ctx.currentTime;
+        const notes = [293.66, 329.63, 392.00, 440.00, 587.33];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+          gain.gain.setValueAtTime(0, now + idx * 0.12);
+          gain.gain.linearRampToValueAtTime(0.25, now + idx * 0.12 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.12);
+          osc.stop(now + idx * 0.12 + 0.4);
+        });
+      }
+    }
+    const soundManager = new SoundManager();
+
+    // --- 3. GRID EDITOR (720x720) ---
+    class HanaoriGrid {
+      constructor(canvasElement, options = {}) {
+        this.canvas = canvasElement;
+        this.ctx = this.canvas.getContext('2d');
+        this.gridSize = options.gridSize || 12;
+        this.currentColor = TRADITIONAL_COLORS[0].hex;
+        this.currentPattern = null;
+        this.symmetricMode = true;
+        this.baseFabricColor = TRADITIONAL_COLORS[6].hex;
+
+        this.history = [];
+        this.historyStep = -1;
+        this.isDragging = false;
+        this.onChangeCallback = null;
+
+        this.initGrid();
+        this.bindEvents();
+      }
+      initGrid() {
+        this.grid = Array(this.gridSize).fill(null).map(() => 
+          Array(this.gridSize).fill(this.baseFabricColor)
+        );
+        this.saveState();
+      }
+      setGridSize(size) {
+        this.gridSize = size;
+        this.initGrid();
+        this.render();
+      }
+      saveState() {
+        this.history = this.history.slice(0, this.historyStep + 1);
+        const gridCopy = JSON.parse(JSON.stringify(this.grid));
+        this.history.push(gridCopy);
+        this.historyStep++;
+        if (this.onChangeCallback) this.onChangeCallback();
+      }
+      undo() {
+        if (this.historyStep > 0) {
+          this.historyStep--;
+          this.grid = JSON.parse(JSON.stringify(this.history[this.historyStep]));
+          soundManager.playTonSound();
+          this.render();
+          if (this.onChangeCallback) this.onChangeCallback();
+        }
+      }
+      redo() {
+        if (this.historyStep < this.history.length - 1) {
+          this.historyStep++;
+          this.grid = JSON.parse(JSON.stringify(this.history[this.historyStep]));
+          soundManager.playTonSound();
+          this.render();
+          if (this.onChangeCallback) this.onChangeCallback();
+        }
+      }
+      clearGrid() {
+        this.grid = Array(this.gridSize).fill(null).map(() => 
+          Array(this.gridSize).fill(this.baseFabricColor)
+        );
+        this.saveState();
+        this.render();
+      }
+      setCellColor(r, c, color, skipSymmetry = false) {
+        if (r >= 0 && r < this.gridSize && c >= 0 && c < this.gridSize) {
+          this.grid[r][c] = color;
+          if (this.symmetricMode && !skipSymmetry) {
+            const mirrorC = this.gridSize - 1 - c;
+            this.setCellColor(r, mirrorC, color, true);
+          }
+        }
+      }
+      applyPatternStamp(startR, startC, patternObj) {
+        const matrix = patternObj.matrix;
+        const pSize = patternObj.size;
+        const offset = Math.floor(pSize / 2);
+        for (let pr = 0; pr < pSize; pr++) {
+          for (let pc = 0; pc < pSize; pc++) {
+            if (matrix[pr][pc] === 1) {
+              const targetR = startR - offset + pr;
+              const targetC = startC - offset + pc;
+              this.setCellColor(targetR, targetC, this.currentColor);
+            }
+          }
+        }
+      }
+      handlePointerAction(x, y, isStart = false) {
+        const rect = this.canvas.getBoundingClientRect();
+        const scaleX = this.canvas.width / rect.width;
+        const scaleY = this.canvas.height / rect.height;
+        const canvasX = (x - rect.left) * scaleX;
+        const canvasY = (y - rect.top) * scaleY;
+        const cellSize = this.canvas.width / this.gridSize;
+        const c = Math.floor(canvasX / cellSize);
+        const r = Math.floor(canvasY / cellSize);
+
+        if (r < 0 || r >= this.gridSize || c < 0 || c >= this.gridSize) return;
+
+        if (this.currentPattern && isStart) {
+          this.applyPatternStamp(r, c, this.currentPattern);
+          soundManager.playTonSound();
+          this.saveState();
+          this.render();
+        } else if (!this.currentPattern) {
+          if (this.grid[r][c] !== this.currentColor) {
+            this.setCellColor(r, c, this.currentColor);
+            soundManager.playTonSound();
+            if (isStart) this.saveState();
+            this.render();
+          }
+        }
+      }
+      bindEvents() {
+        this.canvas.addEventListener('mousedown', (e) => {
+          this.isDragging = true;
+          this.handlePointerAction(e.clientX, e.clientY, true);
+        });
+        this.canvas.addEventListener('mousemove', (e) => {
+          if (this.isDragging && !this.currentPattern) {
+            this.handlePointerAction(e.clientX, e.clientY, false);
+          }
+        });
+        window.addEventListener('mouseup', () => {
+          if (this.isDragging) {
+            this.isDragging = false;
+            if (!this.currentPattern) this.saveState();
+          }
+        });
+        this.canvas.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          if (e.touches.length > 0) {
+            this.isDragging = true;
+            const touch = e.touches[0];
+            this.handlePointerAction(touch.clientX, touch.clientY, true);
+          }
+        }, { passive: false });
+        this.canvas.addEventListener('touchmove', (e) => {
+          e.preventDefault();
+          if (this.isDragging && e.touches.length > 0 && !this.currentPattern) {
+            const touch = e.touches[0];
+            this.handlePointerAction(touch.clientX, touch.clientY, false);
+          }
+        }, { passive: false });
+        this.canvas.addEventListener('touchend', () => {
+          if (this.isDragging) {
+            this.isDragging = false;
+            if (!this.currentPattern) this.saveState();
+          }
+        });
+      }
+      render() {
+        const width = this.canvas.width;
+        const height = this.canvas.height;
+        const cellSize = width / this.gridSize;
+
+        this.ctx.clearRect(0, 0, width, height);
+        this.ctx.fillStyle = this.baseFabricColor;
+        this.ctx.fillRect(0, 0, width, height);
+
+        for (let r = 0; r < this.gridSize; r++) {
+          for (let c = 0; c < this.gridSize; c++) {
+            const cellColor = this.grid[r][c];
+            const x = c * cellSize;
+            const y = r * cellSize;
+
+            // 地の布セル
+            this.ctx.fillStyle = cellColor;
+            this.ctx.fillRect(x, y, cellSize, cellSize);
+
+            if (cellColor === this.baseFabricColor) {
+              // 縦糸のリアルスリット
+              this.ctx.fillStyle = 'rgba(0, 0, 0, 0.20)';
+              for (let lx = x + 3; lx < x + cellSize; lx += 6) {
+                this.ctx.fillRect(lx, y, 1.5, cellSize);
+              }
+            } else {
+              // 浮織（刺繍糸）セル
+              const pad = 1.5;
+              const sx = x + pad;
+              const sy = y + pad;
+              const sw = cellSize - pad * 2;
+              const sh = cellSize - pad * 2;
+
+              // ドロップシャドウ
+              this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+              this.ctx.fillRect(sx + 2, sy + 2, sw, sh);
+
+              // 浮織カラー
+              this.ctx.fillStyle = cellColor;
+              this.ctx.fillRect(sx, sy, sw, sh);
+
+              // 刺繍の横糸ライン
+              this.ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
+              for (let ly = sy + 3; ly < sy + sh; ly += 4) {
+                this.ctx.fillRect(sx, ly, sw, 1);
+              }
+              this.ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+              for (let ly = sy + 4; ly < sy + sh; ly += 4) {
+                this.ctx.fillRect(sx, ly, sw, 1);
+              }
+
+              // ベベル光沢
+              this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+              this.ctx.fillRect(sx, sy, sw, 2);
+              this.ctx.fillRect(sx, sy, 2, sh);
+              this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+              this.ctx.fillRect(sx, sy + sh - 2, sw, 2);
+              this.ctx.fillRect(sx + sw - 2, sy, 2, sh);
+            }
+
+            // グリッド枠線
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeRect(x, y, cellSize, cellSize);
+          }
+        }
+
+        if (this.symmetricMode) {
+          const midX = width / 2;
+          this.ctx.strokeStyle = 'rgba(255, 200, 0, 0.7)';
+          this.ctx.setLineDash([8, 8]);
+          this.ctx.lineWidth = 4;
+          this.ctx.beginPath();
+          this.ctx.moveTo(midX, 0);
+          this.ctx.lineTo(midX, height);
+          this.ctx.stroke();
+          this.ctx.setLineDash([]);
+        }
+      }
+      loadTemplate(templateId) {
+        this.clearGrid();
+        const size = this.gridSize;
+        const mid = Math.floor(size / 2);
+        const red = TRADITIONAL_COLORS[0].hex;
+        const yellow = TRADITIONAL_COLORS[2].hex;
+        const white = TRADITIONAL_COLORS[3].hex;
+
+        if (templateId === 'jinbana_center') {
+          const p = TRADITIONAL_PATTERNS.find(item => item.id === 'jinbana');
+          this.currentColor = red;
+          this.applyPatternStamp(mid - 1, mid - 1, p);
+        } else if (templateId === 'kajimaa_four') {
+          const p = TRADITIONAL_PATTERNS.find(item => item.id === 'kajimaa');
+          this.currentColor = yellow;
+          this.applyPatternStamp(3, 3, p);
+          this.currentColor = red;
+          this.applyPatternStamp(size - 4, 3, p);
+        } else if (templateId === 'diamond_all') {
+          for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+              if ((r + c) % 4 === 0) {
+                this.grid[r][c] = (r % 2 === 0) ? red : yellow;
+              } else if ((r - c) % 4 === 0) {
+                this.grid[r][c] = white;
+              }
+            }
+          }
+        }
+        this.saveState();
+        this.render();
+      }
+    }
+
+    // --- 4. PREVIEW RENDERER (添付画像の本物花織重ね表示 3D差し替えモジュール) ---
+    class ProductPreview {
+      constructor(canvasElement) {
+        this.canvas = canvasElement;
+        this.ctx = this.canvas.getContext('2d');
+        this.isRealMode = false;
+        this.isFlashyMode = false;
+        this.currentScene = 'ocean'; // 初期シーン: 海の見える窓辺
+
+        // Load fabric texture for overlay
+        this.fabricImg = new Image();
+        this.fabricLoaded = false;
+        this.fabricImg.onload = () => { this.fabricLoaded = true; };
+        this.fabricImg.src = './fabric_texture.png';
+
+        // Load HD Real Woven Fabric texture
+        this.wovenHdImg = new Image();
+        this.wovenHdLoaded = false;
+        this.wovenHdImg.onload = () => {
+          this.wovenHdLoaded = true;
+          if (this.onBgLoadCallback) this.onBgLoadCallback();
+        };
+        this.wovenHdImg.src = './real_woven_fabric_hd.jpg';
+
+        // 📷 AI生成 ＆ 本物実写の複数背景シーン
+        this.bgImages = {
+          ocean: { img: new Image(), loaded: false, src: './real_bg_ocean.jpg' },
+          washitsu: { img: new Image(), loaded: false, src: './real_bg_washitsu.jpg' },
+          collection: { img: new Image(), loaded: false, src: './coaster_stack_bg.png' }
+        };
+
+        Object.keys(this.bgImages).forEach(key => {
+          const item = this.bgImages[key];
+          item.img.onload = () => {
+            item.loaded = true;
+            if (this.onBgLoadCallback) this.onBgLoadCallback();
+          };
+          item.img.src = item.src;
+        });
+      }
+
+      setMode(isReal) {
+        this.isRealMode = isReal;
+      }
+
+      setFlashyMode(isFlashy) {
+        this.isFlashyMode = isFlashy;
+      }
+
+      setScene(sceneId) {
+        if (this.bgImages[sceneId]) {
+          this.currentScene = sceneId;
+        }
+      }
+
+      generateNewAiScene(sceneId, gridInstance) {
+        const targetScene = sceneId || this.currentScene;
+        const statusElem = document.getElementById('ai-status-text');
+        if (statusElem) statusElem.textContent = '🤖 AIが新しいリアル背景画像を生成中...';
+
+        const seed = Math.floor(Math.random() * 999999);
+        let prompt = '';
+        if (targetScene === 'ocean') {
+          prompt = 'photorealistic high resolution modern coastal resort room, light wood table, bright turquoise ocean view balcony, 8k photo';
+        } else if (targetScene === 'washitsu') {
+          prompt = 'photorealistic elegant modern japanese washitsu room, tatami floor, polished dark wooden low table, soft ambient light, 8k photo';
+        } else {
+          prompt = 'photorealistic traditional japanese craft museum exhibition, dark wooden table display, soft warm spotlight, 8k photo';
+        }
+
+        const encodedPrompt = encodeURIComponent(prompt);
+        const aiUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&nologo=true`;
+
+        const aiImg = new Image();
+        aiImg.crossOrigin = 'anonymous';
+        aiImg.onload = () => {
+          this.bgImages[targetScene] = { img: aiImg, loaded: true, src: aiUrl };
+          if (statusElem) statusElem.textContent = '✨ 新しいAI背景の生成が完了しました！';
+          if (gridInstance) this.render('coaster', gridInstance);
+        };
+        aiImg.onerror = () => {
+          if (statusElem) statusElem.textContent = '💡 高精細ローカルAI背景で表示中';
+        };
+        aiImg.src = aiUrl;
+      }
+
+      // 📷 背景シーン画像の描画
+      drawCoasterStackBackground(ctx, w, h) {
+        const bgItem = this.bgImages[this.currentScene] || this.bgImages['ocean'];
+        if (bgItem && bgItem.loaded) {
+          ctx.drawImage(bgItem.img, 0, 0, w, h);
+        } else {
+          const grad = ctx.createLinearGradient(0, 0, 0, h);
+          grad.addColorStop(0, '#3A2E2B');
+          grad.addColorStop(1, '#1A1412');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, w, h);
+        }
+      }
+
+      render(productId, gridInstance) {
+        const width = this.canvas.width;
+        const height = this.canvas.height;
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, width, height);
+
+        if (this.isRealMode) {
+          switch (productId) {
+            case 'coaster': this.renderRealCoaster(ctx, width, height, gridInstance); break;
+            case 'strap': this.renderRealStrap(ctx, width, height, gridInstance); break;
+            case 'bookmark': this.renderRealBookmark(ctx, width, height, gridInstance); break;
+            case 'wallpaper': this.renderRealWallpaper(ctx, width, height, gridInstance); break;
+            case 'mat': this.renderRealMat(ctx, width, height, gridInstance); break;
+            default: this.renderRealCoaster(ctx, width, height, gridInstance);
+          }
+        } else {
+          const bgGrad = ctx.createRadialGradient(width / 2, height / 2, 100, width / 2, height / 2, width * 0.8);
+          bgGrad.addColorStop(0, '#2E2B38');
+          bgGrad.addColorStop(1, '#111015');
+          ctx.fillStyle = bgGrad;
+          ctx.fillRect(0, 0, width, height);
+
+          ctx.strokeStyle = 'rgba(255, 200, 0, 0.4)';
+          ctx.lineWidth = 4;
+          ctx.strokeRect(20, 20, width - 40, height - 40);
+
+          switch (productId) {
+            case 'coaster': this.renderCoaster(ctx, width, height, gridInstance); break;
+            case 'strap': this.renderStrap(ctx, width, height, gridInstance); break;
+            case 'bookmark': this.renderBookmark(ctx, width, height, gridInstance); break;
+            case 'wallpaper': this.renderWallpaper(ctx, width, height, gridInstance); break;
+            case 'mat': this.renderMat(ctx, width, height, gridInstance); break;
+            default: this.renderCoaster(ctx, width, height, gridInstance);
+          }
+        }
+      }
+
+      renderRealCoaster(ctx, w, h, grid) {
+        this.drawCoasterStackBackground(ctx, w, h);
+
+        ctx.save();
+        let cx, cy, sizeW, sizeH, transformArgs, shadowEllipse;
+
+        if (this.currentScene === 'ocean') {
+          // 海の見える明るい窓辺の木目テーブル
+          cx = w * 0.38;
+          cy = h * 0.74;
+          sizeW = w * 0.36;
+          sizeH = h * 0.28;
+          transformArgs = [0.94, -0.10, 0.18, 0.62, 0, 0];
+          shadowEllipse = { x: cx + 10, y: cy + 14, rx: sizeW * 0.50, ry: sizeH * 0.48, rot: -0.1 };
+        } else if (this.currentScene === 'washitsu') {
+          // 畳の和室ローテーブル
+          cx = w * 0.49;
+          cy = h * 0.72;
+          sizeW = w * 0.36;
+          sizeH = h * 0.26;
+          transformArgs = [0.95, -0.04, 0.14, 0.58, 0, 0];
+          shadowEllipse = { x: cx + 8, y: cy + 12, rx: sizeW * 0.52, ry: sizeH * 0.48, rot: -0.04 };
+        } else {
+          // 花織コレクションスタック
+          cx = w * 0.68;
+          cy = h * 0.73;
+          sizeW = w * 0.44;
+          sizeH = h * 0.39;
+          transformArgs = [0.92, 0.12, -0.16, 0.72, 0, 0];
+          shadowEllipse = { x: cx + 12, y: cy + 18, rx: sizeW * 0.52, ry: sizeH * 0.52, rot: 0.12 };
+        }
+
+        // Drop shadow
+        ctx.save();
+        ctx.fillStyle = 'rgba(10, 5, 0, 0.55)';
+        ctx.beginPath();
+        ctx.ellipse(shadowEllipse.x, shadowEllipse.y, shadowEllipse.rx, shadowEllipse.ry, shadowEllipse.rot, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // 3D perspective transformation
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.transform(...transformArgs);
+
+        // Off-white fabric base
+        ctx.fillStyle = '#FFF8E1';
+        ctx.fillRect(-sizeW / 2, -sizeH / 2, sizeW, sizeH);
+
+        // Fringes
+        ctx.fillStyle = '#E9BC00';
+        const fringeLen = 16;
+        for (let y = -sizeH / 2; y <= sizeH / 2; y += 8) {
+          ctx.fillRect(-sizeW / 2 - fringeLen, y, fringeLen, 3);
+          ctx.fillRect(sizeW / 2, y, fringeLen, 3);
+        }
+
+        // Draw pattern
+        this.drawPatternOnCanvas(ctx, grid, -sizeW / 2, -sizeH / 2, sizeW, sizeH);
+
+        // Fabric texture overlay if enabled
+        if (this.isFlashyMode && this.fabricLoaded) {
+          ctx.save();
+          ctx.globalCompositeOperation = 'multiply';
+          ctx.globalAlpha = 0.4;
+          const pattern = ctx.createPattern(this.fabricImg, 'repeat');
+          ctx.fillStyle = pattern;
+          ctx.fillRect(-sizeW / 2, -sizeH / 2, sizeW, sizeH);
+          ctx.restore();
+        }
+
+        // Realistic lighting overlay (highlight left-top, shadow right-bottom)
+        const lightGrad = ctx.createRadialGradient(-sizeW * 0.2, -sizeH * 0.2, 10, 0, 0, sizeW * 0.8);
+        lightGrad.addColorStop(0, 'rgba(255, 255, 255, 0.25)');
+        lightGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.05)');
+        lightGrad.addColorStop(1, 'rgba(0, 0, 0, 0.35)');
+        ctx.fillStyle = lightGrad;
+        ctx.fillRect(-sizeW / 2, -sizeH / 2, sizeW, sizeH);
+
+        // Edge shadow for realistic weave thickness
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillRect(-sizeW / 2, sizeH / 2 - 3, sizeW, 6);
+
+        // Sparkle particles if flashy mode
+        if (this.isFlashyMode) {
+          this.drawSparkleParticles(ctx, -sizeW / 2, -sizeH / 2, sizeW, sizeH);
+        }
+
+        // Tag seal
+        ctx.save();
+        const tagX = -sizeW / 2 + 35;
+        const tagY = sizeH / 2 - 35;
+        ctx.fillStyle = '#E6C07D';
+        ctx.beginPath();
+        ctx.arc(tagX, tagY, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#D70035';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = '#D70035';
+        ctx.font = '900 10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('読谷山', tagX, tagY + 3);
+        ctx.restore();
+
+        ctx.restore(); // restore transform
+        ctx.restore(); // restore container save
+      }
+
+      drawSparkleParticles(ctx, x, y, width, height) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(255, 245, 200, 0.85)';
+        const count = 12;
+        const time = Date.now() * 0.003;
+        for (let i = 0; i < count; i++) {
+          const px = x + ((Math.sin(i * 99 + time) + 1) / 2) * width;
+          const py = y + ((Math.cos(i * 33 + time) + 1) / 2) * height;
+          const size = 2 + Math.sin(time + i) * 1.5;
+          ctx.beginPath();
+          ctx.arc(px, py, Math.max(0.5, size), 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      renderRealStrap(ctx, w, h, grid) {
+        this.drawCoasterStackBackground(ctx, w, h);
+
+        ctx.save();
+        const strapW = 150;
+        const strapH = 440;
+        const cx = w * 0.52;
+        const cy = h * 0.58;
+
+        ctx.fillStyle = 'rgba(10, 5, 0, 0.55)';
+        ctx.beginPath();
+        ctx.ellipse(cx + 25, cy + 35, strapW * 0.65, strapH * 0.35, 0.25, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.transform(0.85, 0.32, -0.28, 0.68, 0, 0);
+
+        ctx.strokeStyle = '#E60039';
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(0, -strapH / 2 - 90);
+        ctx.quadraticCurveTo(-40, -strapH / 2 - 40, 0, -strapH / 2 - 12);
+        ctx.stroke();
+
+        ctx.fillStyle = '#FFC800';
+        ctx.beginPath();
+        ctx.arc(0, -strapH / 2 - 12, 24, 0, Math.PI * 2);
+        ctx.fill();
+
+        this.drawPatternOnCanvas(ctx, grid, -strapW / 2, -strapH / 2, strapW, strapH);
+
+        ctx.fillStyle = '#E60039';
+        for (let x = -strapW / 2 + 4; x < strapW / 2; x += 10) {
+          ctx.fillRect(x, strapH / 2, 6, 50);
+        }
+
+        ctx.restore();
+        ctx.restore();
+      }
+
+      renderRealBookmark(ctx, w, h, grid) {
+        this.drawCoasterStackBackground(ctx, w, h);
+
+        ctx.save();
+        const bkW = 160;
+        const bkH = 460;
+        const cx = w * 0.52;
+        const cy = h * 0.58;
+
+        ctx.fillStyle = 'rgba(10, 5, 0, 0.55)';
+        ctx.beginPath();
+        ctx.ellipse(cx + 25, cy + 35, bkW * 0.6, bkH * 0.32, -0.1, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.transform(0.88, -0.15, 0.35, 0.65, 0, 0);
+
+        this.drawPatternOnCanvas(ctx, grid, -bkW / 2, -bkH / 2, bkW, bkH);
+
+        ctx.fillStyle = '#E60039';
+        ctx.beginPath();
+        ctx.moveTo(0, -bkH / 2);
+        ctx.lineTo(-40, -bkH / 2 - 80);
+        ctx.lineTo(25, -bkH / 2 - 80);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+        ctx.restore();
+      }
+
+      renderRealWallpaper(ctx, w, h, grid) {
+        this.drawCoasterStackBackground(ctx, w, h);
+
+        ctx.save();
+        const cx = w * 0.52;
+        const cy = h * 0.55;
+        const pW = 340;
+        const pH = 580;
+
+        ctx.fillStyle = 'rgba(10, 5, 0, 0.6)';
+        ctx.beginPath();
+        ctx.ellipse(cx + 30, cy + 40, pW * 0.65, pH * 0.38, -0.15, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.transform(0.9, -0.12, 0.25, 0.65, 0, 0);
+
+        ctx.fillStyle = '#2A292E';
+        this.roundRect(ctx, -pW / 2 + 10, -pH / 2 + 10, pW, pH, 40, true, false);
+
+        ctx.fillStyle = '#0F0F12';
+        this.roundRect(ctx, -pW / 2, -pH / 2, pW, pH, 40, true, false);
+
+        ctx.save();
+        this.roundRect(ctx, -pW / 2 + 10, -pH / 2 + 10, pW - 20, pH - 20, 32, false, false);
+        ctx.clip();
+
+        const itemH = pW - 20;
+        for (let y = -pH / 2 + 10; y < pH / 2; y += itemH) {
+          this.drawPatternOnCanvas(ctx, grid, -pW / 2 + 10, y, pW - 20, itemH);
+        }
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 44px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('12:34', 0, -pH / 2 + 90);
+        ctx.font = '22px sans-serif';
+        ctx.fillText('9月1日 火曜日', 0, -pH / 2 + 130);
+
+        const glassGrad = ctx.createLinearGradient(-pW, -pH, pW, pH);
+        glassGrad.addColorStop(0, 'rgba(255, 255, 255, 0.42)');
+        glassGrad.addColorStop(0.4, 'rgba(255, 255, 255, 0.12)');
+        glassGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = glassGrad;
+        ctx.fillRect(-pW / 2, -pH / 2, pW, pH);
+
+        ctx.restore();
+        ctx.restore();
+        ctx.restore();
+      }
+
+      renderRealMat(ctx, w, h, grid) {
+        this.drawCoasterStackBackground(ctx, w, h);
+
+        ctx.save();
+        const matW = 560;
+        const matH = 320;
+        const cx = w * 0.5;
+        const cy = h * 0.58;
+
+        ctx.fillStyle = 'rgba(10, 5, 0, 0.55)';
+        ctx.beginPath();
+        ctx.ellipse(cx + 20, cy + 30, matW * 0.55, matH * 0.35, -0.05, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.transform(1, -0.08, 0.32, 0.48, 0, 0);
+
+        this.drawPatternOnCanvas(ctx, grid, -matW / 2, -matH / 2, matW, matH);
+
+        ctx.fillStyle = '#F5F5F0';
+        for (let y = -matH / 2 + 4; y < matH / 2; y += 10) {
+          ctx.fillRect(-matW / 2 - 24, y, 24, 4);
+          ctx.fillRect(matW / 2, y, 24, 4);
+        }
+        ctx.restore();
+        ctx.restore();
+      }
+
+      renderCoaster(ctx, w, h, grid) {
+        const coasterSize = Math.min(w, h) * 0.65;
+        const cx = (w - coasterSize) / 2;
+        const cy = (h - coasterSize) / 2;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        ctx.shadowBlur = 40;
+        ctx.shadowOffsetY = 20;
+
+        ctx.fillStyle = '#FFC800';
+        const fringeLen = 40;
+        for (let y = cy; y <= cy + coasterSize; y += 8) {
+          ctx.fillRect(cx - fringeLen, y, fringeLen, 4);
+          ctx.fillRect(cx + coasterSize, y, fringeLen, 4);
+        }
+        for (let x = cx; x <= cx + coasterSize; x += 8) {
+          ctx.fillRect(x, cy - fringeLen, 4, fringeLen);
+          ctx.fillRect(x, cy + coasterSize, 4, fringeLen);
+        }
+        this.drawPatternOnCanvas(ctx, grid, cx, cy, coasterSize, coasterSize);
+        ctx.restore();
+      }
+
+      renderStrap(ctx, w, h, grid) {
+        const strapW = w * 0.28;
+        const strapH = h * 0.68;
+        const cx = (w - strapW) / 2;
+        const cy = (h - strapH) / 2 + 40;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+        ctx.shadowBlur = 35;
+        ctx.shadowOffsetY = 15;
+
+        ctx.strokeStyle = '#E60039';
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(w / 2, cy - 90);
+        ctx.quadraticCurveTo(w / 2 - 40, cy - 50, w / 2, cy - 20);
+        ctx.stroke();
+
+        ctx.fillStyle = '#FFC800';
+        ctx.beginPath();
+        ctx.arc(w / 2, cy - 16, 22, 0, Math.PI * 2);
+        ctx.fill();
+
+        this.drawPatternOnCanvas(ctx, grid, cx, cy, strapW, strapH);
+        ctx.fillStyle = '#E60039';
+        for (let x = cx + 4; x < cx + strapW; x += 8) {
+          ctx.fillRect(x, cy + strapH, 5, 45);
+        }
+        ctx.restore();
+      }
+
+      renderBookmark(ctx, w, h, grid) {
+        const bkW = w * 0.34;
+        const bkH = h * 0.74;
+        const cx = (w - bkW) / 2;
+        const cy = (h - bkH) / 2;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        ctx.shadowBlur = 35;
+        ctx.shadowOffsetY = 20;
+        this.drawPatternOnCanvas(ctx, grid, cx, cy, bkW, bkH);
+
+        ctx.fillStyle = '#E60039';
+        ctx.beginPath();
+        ctx.moveTo(w / 2, cy + 25);
+        ctx.lineTo(w / 2 - 35, cy - 70);
+        ctx.lineTo(w / 2 + 15, cy - 70);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      renderWallpaper(ctx, w, h, grid) {
+        const phoneW = w * 0.48;
+        const phoneH = h * 0.82;
+        const cx = (w - phoneW) / 2;
+        const cy = (h - phoneH) / 2;
+        ctx.save();
+        ctx.fillStyle = '#0F0F12';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+        ctx.shadowBlur = 50;
+        ctx.shadowOffsetY = 25;
+        this.roundRect(ctx, cx, cy, phoneW, phoneH, 40, true, false);
+
+        ctx.save();
+        this.roundRect(ctx, cx + 10, cy + 10, phoneW - 20, phoneH - 20, 32, false, false);
+        ctx.clip();
+
+        const itemH = (phoneW - 20);
+        for (let y = cy + 10; y < cy + phoneH; y += itemH) {
+          this.drawPatternOnCanvas(ctx, grid, cx + 10, y, phoneW - 20, itemH);
+        }
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 44px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('12:34', w / 2, cy + 100);
+        ctx.font = '22px sans-serif';
+        ctx.fillText('9月1日 火曜日', w / 2, cy + 140);
+        ctx.restore();
+        ctx.restore();
+      }
+
+      renderMat(ctx, w, h, grid) {
+        const matW = w * 0.78;
+        const matH = h * 0.58;
+        const cx = (w - matW) / 2;
+        const cy = (h - matH) / 2;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+        ctx.shadowBlur = 40;
+        ctx.shadowOffsetY = 20;
+        this.drawPatternOnCanvas(ctx, grid, cx, cy, matW, matH);
+        ctx.fillStyle = '#F5F5F0';
+        for (let y = cy + 4; y < cy + matH; y += 8) {
+          ctx.fillRect(cx - 20, y, 20, 4);
+          ctx.fillRect(cx + matW, y, 20, 4);
+        }
+        ctx.restore();
+      }
+
+      drawPatternOnCanvas(ctx, grid, x, y, width, height) {
+        const size = grid.gridSize;
+        const cellW = width / size;
+        const cellH = height / size;
+        ctx.save();
+        ctx.translate(x, y);
+
+        // 1. 地の布（ベース生地）の縦糸・横糸の織目描画
+        for (let r = 0; r < size; r++) {
+          for (let c = 0; c < size; c++) {
+            const color = grid.grid[r][c];
+            const cx = c * cellW;
+            const cy = r * cellH;
+            ctx.fillStyle = color;
+            ctx.fillRect(cx, cy, cellW, cellH);
+
+            if (color === grid.baseFabricColor) {
+              // 縦糸の立体スリット
+              ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+              for (let lx = cx + 2; lx < cx + cellW; lx += 4) {
+                ctx.fillRect(lx, cy, 1.2, cellH);
+              }
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+              for (let lx = cx + 3; lx < cx + cellW; lx += 4) {
+                ctx.fillRect(lx, cy, 0.8, cellH);
+              }
+            }
+          }
+        }
+
+        // 2. 読谷山花織 特有の「浮織（うきおり）」立体刺繍糸の描画
+        for (let r = 0; r < size; r++) {
+          for (let c = 0; c < size; c++) {
+            const color = grid.grid[r][c];
+            if (color === grid.baseFabricColor) continue;
+
+            const cx = c * cellW;
+            const cy = r * cellH;
+            const pad = 1.0;
+            const sx = cx + pad;
+            const sy = cy + pad;
+            const sw = cellW - pad * 2;
+            const sh = cellH - pad * 2;
+
+            // 浮き出た刺繍糸の下の立体ドロップシャドウ
+            ctx.fillStyle = 'rgba(10, 5, 0, 0.45)';
+            ctx.fillRect(sx + 1.5, sy + 1.8, sw, sh);
+
+            // 浮織糸の本体カラー
+            ctx.fillStyle = color;
+            ctx.fillRect(sx, sy, sw, sh);
+
+            // 横糸（花模様の刺繍糸）の立体的な糸の太さと織り目ライン
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+            for (let ly = sy + 2; ly < sy + sh; ly += 3) {
+              ctx.fillRect(sx, ly, sw, 1);
+            }
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+            for (let ly = sy + 3; ly < sy + sh; ly += 3) {
+              ctx.fillRect(sx, ly, sw, 1);
+            }
+
+            // 刺繍糸のベベル・上左右のシルク光沢ハイライト
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+            ctx.fillRect(sx, sy, sw, 1.5);
+            ctx.fillRect(sx, sy, 1.5, sh);
+
+            // 刺繍糸の右下の立体影
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+            ctx.fillRect(sx, sy + sh - 1.5, sw, 1.5);
+            ctx.fillRect(sx + sw - 1.5, sy, 1.5, sh);
+          }
+        }
+
+        // 3. 超高画質AI生成の手織りマクロテクスチャ (`real_woven_fabric_hd.jpg`) の乗算合成
+        if (this.wovenHdLoaded) {
+          ctx.save();
+          ctx.globalCompositeOperation = 'multiply';
+          ctx.globalAlpha = 0.42;
+          const pattern = ctx.createPattern(this.wovenHdImg, 'repeat');
+          ctx.fillStyle = pattern;
+          ctx.fillRect(0, 0, width, height);
+          ctx.restore();
+
+          // 絹糸（シルク）の上品な光輝ソフトライトグラデーション
+          ctx.save();
+          ctx.globalCompositeOperation = 'soft-light';
+          ctx.globalAlpha = 0.28;
+          const sheenGrad = ctx.createLinearGradient(0, 0, width, height);
+          sheenGrad.addColorStop(0, '#FFFFFF');
+          sheenGrad.addColorStop(0.5, 'rgba(128, 128, 128, 0.5)');
+          sheenGrad.addColorStop(1, '#000000');
+          ctx.fillStyle = sheenGrad;
+          ctx.fillRect(0, 0, width, height);
+          ctx.restore();
+        }
+
+        ctx.restore();
+      }
+
+      roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        if (fill) ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+    }
+
+    // --- 5. EXPORT FUNCTION ---
+    function downloadCanvasImage(canvas, filename = 'my_yomitan_hanaori.png') {
+      if (!canvas) return;
+      if (navigator.canShare && navigator.share) {
+        canvas.toBlob((blob) => {
+          if (!blob) { fallbackDownload(canvas, filename); return; }
+          const file = new File([blob], filename, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            navigator.share({ files: [file], title: '読谷山花織デザイン作品', text: 'スマホで読谷山花織の伝統デザインを作ったよ！' })
+              .catch(() => fallbackDownload(canvas, filename));
+          } else {
+            fallbackDownload(canvas, filename);
+          }
+        }, 'image/png');
+      } else {
+        fallbackDownload(canvas, filename);
+      }
+    }
+    function fallbackDownload(canvas, filename) {
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // --- 6. MAIN CONTROLLER ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const gridCanvas = document.getElementById('grid-canvas');
+      const previewCanvas = document.getElementById('preview-canvas');
+
+      const tabEdit = document.getElementById('tab-edit');
+      const tabPreview = document.getElementById('tab-preview');
+      const viewEditor = document.getElementById('view-editor');
+      const viewPreviewSection = document.getElementById('view-preview-section');
+
+      const colorPalette = document.getElementById('color-palette');
+      const patternPalette = document.getElementById('pattern-palette');
+      const productList = document.getElementById('product-list');
+
+      const btnViewFlat = document.getElementById('btn-view-flat');
+      const btnViewReal = document.getElementById('btn-view-real');
+
+      const btnUndo = document.getElementById('btn-undo');
+      const btnRedo = document.getElementById('btn-redo');
+      const btnClear = document.getElementById('btn-clear');
+
+      const toggleSymmetry = document.getElementById('toggle-symmetry');
+      const btnSoundToggle = document.getElementById('btn-sound-toggle');
+      const soundIcon = document.getElementById('sound-icon');
+
+      const btnOpenZukan = document.getElementById('btn-open-zukan');
+      const btnCloseZukan = document.getElementById('btn-close-zukan');
+      const modalZukan = document.getElementById('modal-zukan');
+      const zukanBody = document.getElementById('zukan-body');
+
+      const productTitle = document.getElementById('product-title');
+      const productDesc = document.getElementById('product-desc');
+      const btnDownload = document.getElementById('btn-download');
+
+      const gridInstance = new HanaoriGrid(gridCanvas, { gridSize: 12 });
+      const previewInstance = new ProductPreview(previewCanvas);
+      let currentProductId = PRODUCTS[0].id;
+
+      previewInstance.onBgLoadCallback = () => {
+        if (viewPreviewSection.classList.contains('active')) {
+          previewInstance.render(currentProductId, gridInstance);
+        }
+      };
+
+      gridInstance.render();
+
+      // Render color palette
+      TRADITIONAL_COLORS.forEach((colorObj, idx) => {
+        const swatch = document.createElement('button');
+        swatch.className = `color-swatch ${idx === 0 ? 'active' : ''}`;
+        swatch.style.backgroundColor = colorObj.hex;
+        swatch.title = colorObj.name;
+
+        swatch.addEventListener('click', () => {
+          document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+          swatch.classList.add('active');
+          gridInstance.currentColor = colorObj.hex;
+          gridInstance.currentPattern = null;
+          document.querySelectorAll('.stamp-item').forEach(st => st.classList.remove('active'));
+          soundManager.playTonSound();
+        });
+        colorPalette.appendChild(swatch);
+      });
+
+      // Render pattern stamps
+      TRADITIONAL_PATTERNS.forEach(pat => {
+        const stamp = document.createElement('div');
+        stamp.className = 'stamp-item';
+        stamp.innerHTML = `<span class="stamp-icon">${pat.icon}</span><span class="stamp-name">${pat.name}</span>`;
+
+        stamp.addEventListener('click', () => {
+          document.querySelectorAll('.stamp-item').forEach(st => st.classList.remove('active'));
+          stamp.classList.add('active');
+          gridInstance.currentPattern = pat;
+          soundManager.playTonSound();
+        });
+        patternPalette.appendChild(stamp);
+      });
+
+      // Render product selection chips
+      PRODUCTS.forEach((prod, idx) => {
+        const chip = document.createElement('button');
+        chip.className = `product-chip ${idx === 0 ? 'active' : ''}`;
+        chip.innerHTML = `${prod.icon} ${prod.name}`;
+
+        chip.addEventListener('click', () => {
+          document.querySelectorAll('.product-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          currentProductId = prod.id;
+          productTitle.textContent = `${prod.icon} ${prod.name}`;
+          productDesc.textContent = prod.desc;
+          previewInstance.render(currentProductId, gridInstance);
+          soundManager.playTonSound();
+        });
+        productList.appendChild(chip);
+      });
+
+      const sceneSelectorWrapper = document.getElementById('scene-selector-wrapper');
+
+      // View mode buttons (平面 ⇄ 本物の花織コレクション実写写真)
+      btnViewFlat.addEventListener('click', () => {
+        btnViewFlat.classList.add('active');
+        btnViewReal.classList.remove('active');
+        if (sceneSelectorWrapper) sceneSelectorWrapper.style.display = 'none';
+        previewInstance.setMode(false);
+        previewInstance.render(currentProductId, gridInstance);
+        soundManager.playTonSound();
+      });
+
+      // 派手モードトグル（ツールバーに追加）
+      const isFlashyChecked = JSON.parse(localStorage.getItem('flashyMode') || 'false');
+      const flashyLabel = document.createElement('label');
+      flashyLabel.className = 'symmetry-toggle';
+      flashyLabel.innerHTML = `<input type='checkbox' id='toggle-flashy' ${isFlashyChecked ? 'checked' : ''}>` +
+        `<span class='slider'></span><span class='toggle-text'>派手モード</span>`;
+      const toolbar = document.querySelector('.editor-toolbar');
+      if (toolbar) {
+        toolbar.appendChild(flashyLabel);
+      }
+
+      const toggleFlashyElem = document.getElementById('toggle-flashy');
+      if (toggleFlashyElem) {
+        previewInstance.setFlashyMode(toggleFlashyElem.checked);
+        toggleFlashyElem.addEventListener('change', (e) => {
+          const enabled = e.target.checked;
+          localStorage.setItem('flashyMode', enabled);
+          previewInstance.setFlashyMode(enabled);
+          if (viewPreviewSection.classList.contains('active')) {
+            previewInstance.render(currentProductId, gridInstance);
+          }
+          soundManager.playTonSound();
+        });
+      }
+
+      btnViewReal.addEventListener('click', () => {
+        btnViewReal.classList.add('active');
+        btnViewFlat.classList.remove('active');
+        if (sceneSelectorWrapper) sceneSelectorWrapper.style.display = 'flex';
+        previewInstance.setMode(true);
+        if (toggleFlashyElem) {
+          previewInstance.setFlashyMode(toggleFlashyElem.checked);
+        }
+        previewInstance.render(currentProductId, gridInstance);
+        soundManager.playTonSound();
+      });
+
+      // AI背景シーン選択ボタン
+      document.querySelectorAll('.btn-scene').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.btn-scene').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const sceneId = btn.dataset.scene;
+          previewInstance.setScene(sceneId);
+          previewInstance.render(currentProductId, gridInstance);
+          soundManager.playTonSound();
+        });
+      });
+
+      // AIリアルタイム生成ボタン
+      const btnGenerateAi = document.getElementById('btn-generate-ai');
+      if (btnGenerateAi) {
+        btnGenerateAi.addEventListener('click', () => {
+          previewInstance.generateNewAiScene(null, gridInstance);
+          soundManager.playTonSound();
+        });
+      }
+
+      // Grid size buttons
+      document.querySelectorAll('.btn-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.btn-chip').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const newSize = parseInt(btn.dataset.size, 10);
+          gridInstance.setGridSize(newSize);
+          soundManager.playTonSound();
+        });
+      });
+
+      // Symmetry toggle
+      toggleSymmetry.addEventListener('change', (e) => {
+        gridInstance.symmetricMode = e.target.checked;
+        gridInstance.render();
+        soundManager.playTonSound();
+      });
+
+      // Undo / Redo / Clear
+      btnUndo.addEventListener('click', () => gridInstance.undo());
+      btnRedo.addEventListener('click', () => gridInstance.redo());
+      btnClear.addEventListener('click', () => {
+        if (confirm('作ったもようをぜんぶ消してもいいですか？')) {
+          gridInstance.clearGrid();
+          soundManager.playTonSound();
+        }
+      });
+
+      // Templates
+      document.querySelectorAll('.btn-template').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const templateId = btn.dataset.template;
+          gridInstance.loadTemplate(templateId);
+          soundManager.playTonSound();
+        });
+      });
+
+      // Tabs
+      tabEdit.addEventListener('click', () => {
+        tabEdit.classList.add('active');
+        tabPreview.classList.remove('active');
+        viewEditor.classList.add('active');
+        viewPreviewSection.classList.remove('active');
+        soundManager.playTonSound();
+      });
+
+      tabPreview.addEventListener('click', () => {
+        tabPreview.classList.add('active');
+        tabEdit.classList.remove('active');
+        viewPreviewSection.classList.add('active');
+        viewEditor.classList.remove('active');
+        previewInstance.render(currentProductId, gridInstance);
+        soundManager.playFanfare();
+      });
+
+      // Sound toggle
+      btnSoundToggle.addEventListener('click', () => {
+        const isEnabled = soundManager.toggleSound();
+        soundIcon.textContent = isEnabled ? '🔊' : '🔇';
+      });
+
+      // Encyclopedia modal
+      btnOpenZukan.addEventListener('click', () => {
+        zukanBody.innerHTML = '';
+        TRADITIONAL_PATTERNS.forEach(pat => {
+          const card = document.createElement('div');
+          card.className = 'zukan-card';
+          card.innerHTML = `
+            <div class="zukan-icon">${pat.icon}</div>
+            <div class="zukan-info">
+              <h4>${pat.name}</h4>
+              <p>${pat.meaning}</p>
+            </div>
+          `;
+          zukanBody.appendChild(card);
+        });
+        modalZukan.classList.add('active');
+        soundManager.playTonSound();
+      });
+
+      btnCloseZukan.addEventListener('click', () => modalZukan.classList.remove('active'));
+      modalZukan.addEventListener('click', (e) => {
+        if (e.target === modalZukan) modalZukan.classList.remove('active');
+      });
+
+      // Download
+      btnDownload.addEventListener('click', () => {
+        const modeSuffix = previewInstance.isRealMode ? 'real_collection' : 'flat';
+        downloadCanvasImage(previewCanvas, `yomitan_hanaori_${currentProductId}_${modeSuffix}.png`);
+        soundManager.playFanfare();
+      });
+
+      gridInstance.onChangeCallback = () => {
+        if (viewPreviewSection.classList.contains('active')) {
+          previewInstance.render(currentProductId, gridInstance);
+        }
+      };
+    });
+  </script>
+</body>
+</html>
