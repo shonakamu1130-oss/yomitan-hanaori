@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>読谷山花織 ドット絵デザインツール</title>
+  <style>
+    :root {
+      --bg-color: #f4f1ea;
+      --panel-bg: #ffffff;
+      --primary-color: #8b263e;
+      --primary-hover: #701e31;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background-color: var(--bg-color);
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.6rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      flex: 1 1 320px;
+      min-width: 280px;
+      max-width: 380px;
+      width: 100%;
+    }
+
+    .panel h2 {
+      font-size: 1.05rem;
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 5px;
+      margin-top: 0;
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input[type="number"], input[type="color"] {
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.95rem;
+    }
+
+    input[type="number"] {
+      width: 70px;
+    }
+
+    input[type="color"] {
+      height: 38px;
+      width: 44px;
+      padding: 2px;
+      cursor: pointer;
+    }
+
+    .flex-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* カラーパレットのスタイル */
+    .color-palette-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .color-swatch-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.7rem;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      box-shadow: inset 0 0 2px rgba(0,0,0,0.2);
+      transition: transform 0.1s, border-color 0.1s;
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.15);
+    }
+
+    /* 消しゴムボタンのスタイル */
+    .eraser-btn {
+      background-color: #666;
+      color: white;
+      border: 2px solid transparent;
+      padding: 10px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      min-height: 44px;
+    }
+
+    .eraser-btn.active {
+      background-color: #d9534f;
+      border-color: #a94442;
+      box-shadow: 0 0 8px rgba(217, 83, 79, 0.6);
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.95rem;
+      transition: opacity 0.2s, background-color 0.2s;
+      width: 100%;
+      margin-top: 5px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover {
+      opacity: 0.95;
+      background-color: var(--primary-hover);
+    }
+
+    button.secondary {
+      background-color: #555;
+    }
+
+    button.secondary:hover {
+      background-color: #444;
+    }
+
+    .canvas-container {
+      background: var(--panel-bg);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      overflow: auto;
+      flex: 2 1 400px;
+      max-width: 100%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      touch-action: none; /* ドロー操作時の標準スクロールを防止 */
+      box-sizing: border-box;
+    }
+
+    #grid-canvas {
+      border: 1px solid #999;
+      image-rendering: pixelated;
+      max-width: 100%;
+      height: auto;
+      touch-action: none;
+    }
+
+    #grid-canvas.eraser-mode {
+      cursor: cell;
+    }
+
+    #grid-canvas.draw-mode {
+      cursor: crosshair;
+    }
+
+    /* レスポンシブスタイル */
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+
+      h1 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+      }
+
+      .container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+      }
+
+      .panel {
+        max-width: 100%;
+      }
+
+      .canvas-container {
+        padding: 12px;
+        min-height: 300px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .color-swatch {
+        width: 36px;
+        height: 36px;
+      }
+    }
+
+    /* モーダルプレビューのスタイル */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      overflow-y: auto;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      border-radius: 12px;
+      max-width: 960px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      overflow: hidden;
+      animation: modalFadeIn 0.25s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      background: var(--primary-color);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.8rem;
+      cursor: pointer;
+      width: auto;
+      min-height: auto;
+      margin: 0;
+      padding: 0 8px;
+      line-height: 1;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      background: #f9f8f5;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      justify-items: center;
+    }
+
+    .preview-card {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .preview-card h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      color: var(--primary-color);
+      font-size: 1.05rem;
+      border-bottom: 2px solid var(--bg-color);
+      padding-bottom: 4px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .preview-canvas-wrapper {
+      background: #eae6df;
+      padding: 15px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 250px;
+      box-sizing: border-box;
+    }
+
+    .preview-canvas-wrapper canvas {
+      max-width: 100%;
+      height: auto;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+    }
+
+    .download-btn {
+      margin-top: 12px;
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      min-height: 38px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>読谷山花織 ドット絵デザインツール</h1>
+
+  <div class="container">
+    <!-- 操作パネル -->
+    <div class="panel">
+      <!-- 1. マス目の数とサイズ設定 -->
+      <div class="control-group">
+        <h2>1. マス数・サイズ設定</h2>
+        
+        <label>【マス目（グリッド）の数】</label>
+        <div class="flex-row">
+          <label>横マス: <input type="number" id="grid-width" value="16" min="4" max="200"></label>
+          <label>縦マス: <input type="number" id="grid-height" value="16" min="4" max="200"></label>
+        </div>
+        <button onclick="resizeCanvasGrid()">マス数を変更（リセット）</button>
+
+        <hr style="margin: 12px 0; border: none; border-top: 1px dashed #ccc;">
+
+        <label>【1マスの縦横比（形状）設定】</label>
+        <div class="flex-row">
+          <label>横幅(px): <input type="number" id="cell-w" value="20" min="2" max="100" onchange="updateCellRatio()"></label>
+          <label>縦幅(px): <input type="number" id="cell-h" value="20" min="2" max="100" onchange="updateCellRatio()"></label>
+        </div>
+      </div>
+
+      <!-- 2. ベース色（地糸）選択 -->
+      <div class="control-group">
+        <h2>2. ベース色（地糸）選択</h2>
+        <div class="flex-row">
+          <input type="color" id="base-color" value="#f2efe9">
+          <span style="font-size:0.8rem;">カスタム色</span>
+        </div>
+        
+        <label>基本パレット:</label>
+        <div class="color-palette-group" id="base-palette"></div>
+
+        <button class="secondary" onclick="applyBaseColor()" style="margin-top:8px;">全体をベース色で塗る</button>
+      </div>
+
+      <!-- 3. ドット色（花糸）＆ ツール選択 -->
+      <div class="control-group">
+        <h2>3. 塗る色（花糸）＆ ツール</h2>
+        <div class="flex-row">
+          <input type="color" id="draw-color" value="#8b263e" onchange="disableEraser()">
+          <span style="font-size:0.8rem;">カスタム色</span>
+        </div>
+
+        <label>基本パレット:</label>
+        <div class="color-palette-group" id="draw-palette"></div>
+
+        <!-- 消しゴムボタン -->
+        <button id="eraser-btn" class="eraser-btn" onclick="toggleEraser()">
+          <span>🧹 消しゴムモード (OFF)</span>
+        </button>
+      </div>
+
+      <!-- 4. 保存・読み込み -->
+      <div class="control-group">
+        <h2>4. 保存・読み込み</h2>
+        <button onclick="saveProject()">途中のデザインを保存 (JSON)</button>
+        <button class="secondary" onclick="document.getElementById('file-input').click()">保存データを読み込む</button>
+        <input type="file" id="file-input" accept=".json" style="display: none;" onchange="loadProject(event)">
+        <button class="secondary" onclick="exportImage()" style="margin-top: 10px;">画像として保存 (PNG)</button>
+        <button onclick="openPreviewModal()" style="margin-top: 10px; background-color: #2c5d63;">✨ 製品イメージプレビュー</button>
+      </div>
+    </div>
+
+    <!-- 描画キャンバス -->
+    <div class="canvas-container">
+      <canvas id="grid-canvas" class="draw-mode"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // 伝統色・基本パレット的定義（7色）
+    const presetColors = [
+      { name: "白", hex: "#ffffff" },
+      { name: "辛子色", hex: "#d4a373" },
+      { name: "若草色", hex: "#8a9a5b" },
+      { name: "くすみピンク", hex: "#d8a7b1" },
+      { name: "深赤", hex: "#8b263e" },
+      { name: "深緑", hex: "#1b4d3e" },
+      { name: "藍色", hex: "#1a2a3a" }
+    ];
+
+    let cols = 16;
+    let rows = 16;
+    let cellW = 20;
+    let cellH = 20;
+    let gridData = [];
+    let isMouseDown = false;
+    let isEraserMode = false;
+
+    const canvas = document.getElementById('grid-canvas');
+    const ctx = canvas.getContext('2d');
+    const drawColorInput = document.getElementById('draw-color');
+    const baseColorInput = document.getElementById('base-color');
+    const eraserBtn = document.getElementById('eraser-btn');
+
+    window.onload = () => {
+      buildPalettes();
+      initGrid();
+    };
+
+    // パレットのUI生成
+    function buildPalettes() {
+      const baseContainer = document.getElementById('base-palette');
+      const drawContainer = document.getElementById('draw-palette');
+
+      presetColors.forEach(c => {
+        // ベース色用
+        const bItem = document.createElement('div');
+        bItem.className = 'color-swatch-wrapper';
+        bItem.innerHTML = `<div class="color-swatch" style="background:${c.hex}" title="${c.name}"></div>`;
+        bItem.onclick = () => { baseColorInput.value = c.hex; };
+        baseContainer.appendChild(bItem);
+
+        // デザイン色用
+        const dItem = document.createElement('div');
+        dItem.className = 'color-swatch-wrapper';
+        dItem.innerHTML = `<div class="color-swatch" style="background:${c.hex}" title="${c.name}"></div>`;
+        dItem.onclick = () => { setDrawColor(c.hex); };
+        drawContainer.appendChild(dItem);
+      });
+    }
+
+    function initGrid() {
+      cols = parseInt(document.getElementById('grid-width').value);
+      rows = parseInt(document.getElementById('grid-height').value);
+      cellW = parseInt(document.getElementById('cell-w').value);
+      cellH = parseInt(document.getElementById('cell-h').value);
+      const baseColor = baseColorInput.value;
+
+      gridData = Array(rows).fill(null).map(() => Array(cols).fill(baseColor));
+      renderCanvas();
+    }
+
+    function renderCanvas() {
+      canvas.width = cols * cellW;
+      canvas.height = rows * cellH;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          ctx.fillStyle = gridData[r][c];
+          ctx.fillRect(c * cellW, r * cellH, cellW, cellH);
+
+          ctx.strokeStyle = '#cccccc';
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(c * cellW, r * cellH, cellW, cellH);
+        }
+      }
+    }
+
+    function updateCellRatio() {
+      cellW = Math.max(2, parseInt(document.getElementById('cell-w').value) || 2);
+      cellH = Math.max(2, parseInt(document.getElementById('cell-h').value) || 2);
+      renderCanvas();
+    }
+
+    // 塗る・消す（座標計算・セル描画）
+    function paintCellFromPos(x, y) {
+      const c = Math.floor(x / cellW);
+      const r = Math.floor(y / cellH);
+
+      if (r >= 0 && r < rows && c >= 0 && c < cols) {
+        const targetColor = isEraserMode ? baseColorInput.value : drawColorInput.value;
+        if (gridData[r][c] !== targetColor) {
+          gridData[r][c] = targetColor;
+          renderCanvas();
+        }
+      }
+    }
+
+    function paintCell(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      let clientX = e.clientX;
+      let clientY = e.clientY;
+
+      if ((clientX === undefined || clientY === undefined) && e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      }
+
+      if (clientX !== undefined && clientY !== undefined) {
+        const x = (clientX - rect.left) * scaleX;
+        const y = (clientY - rect.top) * scaleY;
+        paintCellFromPos(x, y);
+      }
+    }
+
+    // 消しゴム切り替え
+    function toggleEraser() {
+      isEraserMode = !isEraserMode;
+      if (isEraserMode) {
+        eraserBtn.classList.add('active');
+        eraserBtn.innerHTML = '<span>🧹 消しゴムモード (ON)</span>';
+        canvas.className = 'eraser-mode';
+      } else {
+        disableEraser();
+      }
+    }
+
+    function disableEraser() {
+      isEraserMode = false;
+      eraserBtn.classList.remove('active');
+      eraserBtn.innerHTML = '<span>🧹 消しゴムモード (OFF)</span>';
+      canvas.className = 'draw-mode';
+    }
+
+    function setDrawColor(color) {
+      drawColorInput.value = color;
+      disableEraser(); // 色選択で自動的に消しゴム解除
+    }
+
+    // イベントリスナー（マウス & タッチ操作対応）
+    canvas.addEventListener('mousedown', (e) => {
+      isMouseDown = true;
+      paintCell(e);
+    });
+    canvas.addEventListener('mousemove', (e) => {
+      if (isMouseDown) paintCell(e);
+    });
+    window.addEventListener('mouseup', () => isMouseDown = false);
+
+    // タッチ操作リスナー（スマホ・タブレット用）
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      isMouseDown = true;
+      paintCell(e);
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (isMouseDown) {
+        e.preventDefault();
+        paintCell(e);
+      }
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => isMouseDown = false);
+    window.addEventListener('touchcancel', () => isMouseDown = false);
+
+    function resizeCanvasGrid() {
+      if (confirm("マス数変更を行うと現在のデザインがリセットされます。よろしいですか？")) {
+        initGrid();
+      }
+    }
+
+    function applyBaseColor() {
+      const baseColor = baseColorInput.value;
+      if (confirm("すべてのマスを現在設定されているベース色で塗りつぶしますか？")) {
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            gridData[r][c] = baseColor;
+          }
+        }
+        renderCanvas();
+      }
+    }
+
+    // 保存機能（JSON）
+    function saveProject() {
+      const data = {
+        cols: cols,
+        rows: rows,
+        cellW: cellW,
+        cellH: cellH,
+        baseColor: baseColorInput.value,
+        gridData: gridData
+      };
+      const jsonStr = JSON.stringify(data);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `hanaori_pattern_${cols}x${rows}.json`;
+      a.click();
+    }
+
+    // 読み込み機能（JSON）
+    function loadProject(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          cols = data.cols;
+          rows = data.rows;
+          cellW = data.cellW || 20;
+          cellH = data.cellH || 20;
+          gridData = data.gridData;
+
+          if(data.baseColor) baseColorInput.value = data.baseColor;
+          document.getElementById('grid-width').value = cols;
+          document.getElementById('grid-height').value = rows;
+          document.getElementById('cell-w').value = cellW;
+          document.getElementById('cell-h').value = cellH;
+
+          renderCanvas();
+          alert("デザインデータを読み込みました。");
+        } catch (err) {
+          alert("ファイルの読み込みに失敗しました。");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    // 画像保存処理（スマホ写真ライブラリ保存・Web Share API & デスクトップ対応）
+    async function saveCanvasImage(targetCanvas, fileName) {
+      if (!targetCanvas) return;
+
+      targetCanvas.toBlob(async (blob) => {
+        if (!blob) {
+          const dataUrl = targetCanvas.toDataURL('image/png');
+          triggerDownloadOrNewTab(dataUrl, fileName);
+          return;
+        }
+
+        const file = new File([blob], fileName, { type: 'image/png' });
+
+        // スマホWeb Share API（iOS/Androidの標準共有メニュー・「画像を保存」）
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: '読谷山花織 デザイン画像',
+            });
+            return;
+          } catch (err) {
+            if (err.name === 'AbortError') return;
+          }
+        }
+
+        // デスクトップまたはWeb Share非対応環境へのフォールバック
+        const url = URL.createObjectURL(blob);
+        triggerDownloadOrNewTab(url, fileName);
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      }, 'image/png');
+    }
+
+    function triggerDownloadOrNewTab(url, fileName) {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        const win = window.open(url, '_blank');
+        if (!win) {
+          location.href = url;
+        }
+      } else {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+      }
+    }
+
+    // 画像出力（PNG）
+    function exportImage() {
+      saveCanvasImage(canvas, `hanaori_design_${cols}x${rows}.png`);
+    }
+
+    // -------------------------------------------------------------
+    // 製品イメージプレビュー機能
+    // -------------------------------------------------------------
+    function openPreviewModal() {
+      const modal = document.getElementById('preview-modal');
+      modal.classList.add('active');
+      generatePreviews();
+    }
+
+    function closePreviewModal(e) {
+      if (!e || e.target.id === 'preview-modal' || e.target.classList.contains('modal-close-btn')) {
+        const modal = document.getElementById('preview-modal');
+        modal.classList.remove('active');
+      }
+    }
+
+    function generatePreviews() {
+      // パターンタイル用Offscreen Canvasを生成
+      const patternCanvas = document.createElement('canvas');
+      patternCanvas.width = cols * cellW;
+      patternCanvas.height = rows * cellH;
+      const pCtx = patternCanvas.getContext('2d');
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          pCtx.fillStyle = gridData[r][c];
+          pCtx.fillRect(c * cellW, r * cellH, cellW, cellH);
+        }
+      }
+
+      drawCoasterPreview(patternCanvas);
+      drawStrapPreview(patternCanvas);
+      drawBookmarkPreview(patternCanvas);
+    }
+
+    // 1. コースタープレビューを描画
+    function drawCoasterPreview(patternCanvas) {
+      const cvs = document.getElementById('coaster-canvas');
+      cvs.width = 240;
+      cvs.height = 240;
+      const cCtx = cvs.getContext('2d');
+
+      cCtx.clearRect(0, 0, 240, 240);
+
+      const x = 10, y = 10, w = 220, h = 220, radius = 16;
+      cCtx.save();
+      cCtx.beginPath();
+      cCtx.moveTo(x + radius, y);
+      cCtx.arcTo(x + w, y, x + w, y + h, radius);
+      cCtx.arcTo(x + w, y + h, x, y + h, radius);
+      cCtx.arcTo(x, y + h, x, y, radius);
+      cCtx.arcTo(x, y, x + w, y, radius);
+      cCtx.closePath();
+
+      // 地糸色（ベースカラー）でコースターを塗りつぶし
+      cCtx.fillStyle = baseColorInput.value;
+      cCtx.fill();
+
+      // 縁取り・外枠
+      cCtx.strokeStyle = '#d0c9bd';
+      cCtx.lineWidth = 2;
+      cCtx.stroke();
+
+      // クリップ
+      cCtx.clip();
+
+      // パターンタイルを2x2で配置
+      const innerMargin = 15;
+      const innerW = w - innerMargin * 2;
+      const innerH = h - innerMargin * 2;
+      const pattern = cCtx.createPattern(patternCanvas, 'repeat');
+      
+      cCtx.save();
+      cCtx.translate(x + innerMargin, y + innerMargin);
+      const scaleX = (innerW / 2) / patternCanvas.width;
+      const scaleY = (innerH / 2) / patternCanvas.height;
+      cCtx.scale(scaleX, scaleY);
+      cCtx.fillStyle = pattern;
+      cCtx.fillRect(0, 0, patternCanvas.width * 2, patternCanvas.height * 2);
+      cCtx.restore();
+
+      // 内側のステッチライン（点線）
+      cCtx.setLineDash([4, 4]);
+      cCtx.strokeStyle = 'rgba(0,0,0,0.25)';
+      cCtx.lineWidth = 1.5;
+      cCtx.strokeRect(x + 8, y + 8, w - 16, h - 16);
+
+      cCtx.restore();
+    }
+
+    // 2. ハンドストラッププレビューを描画
+    function drawStrapPreview(patternCanvas) {
+      const cvs = document.getElementById('strap-canvas');
+      cvs.width = 120;
+      cvs.height = 320;
+      const sCtx = cvs.getContext('2d');
+      sCtx.clearRect(0, 0, 120, 320);
+
+      const strapX = 35, strapY = 50, strapW = 50, strapH = 240;
+
+      // 金具（Dカン）の描画
+      sCtx.save();
+      sCtx.lineWidth = 5;
+      sCtx.strokeStyle = '#c5a059'; // ゴールド調金具
+      sCtx.beginPath();
+      sCtx.arc(60, 30, 18, Math.PI, 0);
+      sCtx.lineTo(75, 45);
+      sCtx.lineTo(45, 45);
+      sCtx.closePath();
+      sCtx.stroke();
+      sCtx.restore();
+
+      // レザーのジョイントパーツ
+      sCtx.fillStyle = '#4a2c11';
+      sCtx.fillRect(32, 42, 56, 20);
+
+      // ストラップ本体
+      sCtx.save();
+      sCtx.beginPath();
+      sCtx.rect(strapX, strapY + 10, strapW, strapH);
+      sCtx.fillStyle = baseColorInput.value;
+      sCtx.fill();
+      sCtx.strokeStyle = 'rgba(0,0,0,0.15)';
+      sCtx.lineWidth = 1;
+      sCtx.stroke();
+      sCtx.clip();
+
+      // 縦リピートパターン描画
+      const pattern = sCtx.createPattern(patternCanvas, 'repeat');
+      sCtx.save();
+      sCtx.translate(strapX, strapY + 10);
+      const scale = strapW / patternCanvas.width;
+      sCtx.scale(scale, scale);
+      sCtx.fillStyle = pattern;
+      sCtx.fillRect(0, 0, patternCanvas.width, (strapH / scale));
+      sCtx.restore();
+
+      // 端のステッチ
+      sCtx.setLineDash([3, 3]);
+      sCtx.strokeStyle = 'rgba(255,255,255,0.6)';
+      sCtx.lineWidth = 1;
+      sCtx.beginPath();
+      sCtx.moveTo(strapX + 3, strapY + 10);
+      sCtx.lineTo(strapX + 3, strapY + 10 + strapH);
+      sCtx.moveTo(strapX + strapW - 3, strapY + 10);
+      sCtx.lineTo(strapX + strapW - 3, strapY + 10 + strapH);
+      sCtx.stroke();
+
+      sCtx.restore();
+
+      // カシメ（鋲）
+      sCtx.fillStyle = '#c5a059';
+      sCtx.beginPath();
+      sCtx.arc(60, 52, 4, 0, Math.PI * 2);
+      sCtx.fill();
+    }
+
+    // 3. しおりプレビューを描画
+    function drawBookmarkPreview(patternCanvas) {
+      const cvs = document.getElementById('bookmark-canvas');
+      cvs.width = 140;
+      cvs.height = 320;
+      const bCtx = cvs.getContext('2d');
+      bCtx.clearRect(0, 0, 140, 320);
+
+      const bmX = 35, bmY = 20, bmW = 70, bmH = 220, radius = 8;
+
+      // しおり本体
+      bCtx.save();
+      bCtx.beginPath();
+      bCtx.moveTo(bmX + radius, bmY);
+      bCtx.arcTo(bmX + bmW, bmY, bmX + bmW, bmY + bmH, radius);
+      bCtx.lineTo(bmX + bmW, bmY + bmH);
+      bCtx.lineTo(bmX, bmY + bmH);
+      bCtx.arcTo(bmX, bmY, bmX + bmW, bmY, radius);
+      bCtx.closePath();
+
+      bCtx.fillStyle = baseColorInput.value;
+      bCtx.fill();
+      bCtx.strokeStyle = 'rgba(0,0,0,0.12)';
+      bCtx.lineWidth = 1;
+      bCtx.stroke();
+      bCtx.clip();
+
+      // 縦リピートパターン
+      const pattern = bCtx.createPattern(patternCanvas, 'repeat');
+      bCtx.save();
+      const margin = 8;
+      bCtx.translate(bmX + margin, bmY + margin);
+      const scale = (bmW - margin * 2) / patternCanvas.width;
+      bCtx.scale(scale, scale);
+      bCtx.fillStyle = pattern;
+      bCtx.fillRect(0, 0, patternCanvas.width, ((bmH - margin * 2) / scale));
+      bCtx.restore();
+
+      bCtx.restore();
+
+      // 下部のタッセル・フリンジ（房糸）の描画
+      bCtx.save();
+      const tasselY = bmY + bmH;
+      const drawColor = drawColorInput.value;
+
+      // 束ね目
+      bCtx.fillStyle = drawColor;
+      bCtx.fillRect(58, tasselY, 24, 6);
+
+      // フリンジ糸
+      bCtx.lineWidth = 1.5;
+      bCtx.strokeStyle = drawColor;
+      for (let i = 0; i < 14; i++) {
+        const threadX = 59 + i * 1.6;
+        bCtx.beginPath();
+        bCtx.moveTo(threadX, tasselY + 6);
+        bCtx.quadraticCurveTo(threadX + (i % 2 === 0 ? 2 : -2), tasselY + 30, threadX + (i % 3 - 1), tasselY + 50);
+        bCtx.stroke();
+      }
+      bCtx.restore();
+    }
+
+    // プレビューの個別保存
+    function downloadPreview(canvasId, fileName) {
+      const targetCanvas = document.getElementById(canvasId);
+      saveCanvasImage(targetCanvas, fileName);
+    }
+  </script>
+
+  <!-- 製品イメージプレビューモーダル -->
+  <div id="preview-modal" class="modal-overlay" onclick="closePreviewModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>読谷山花織 製品イメージプレビュー</h2>
+        <button class="modal-close-btn" onclick="closePreviewModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size: 0.8rem; color: #333; background: #eef4f4; border: 1px solid #b2d3d3; padding: 8px 12px; border-radius: 6px; margin-bottom: 15px; text-align: center;">
+          💡 <strong>スマホで「写真」アプリに保存：</strong>「画像を保存」ボタンを押して表示されるメニューから「画像を保存」を選択するか、画像を長押ししてください。
+        </div>
+        <div class="preview-grid">
+          <!-- コースター -->
+          <div class="preview-card">
+            <h3>コースター</h3>
+            <div class="preview-canvas-wrapper">
+              <canvas id="coaster-canvas"></canvas>
+            </div>
+            <button class="secondary download-btn" onclick="downloadPreview('coaster-canvas', 'hanaori_coaster.png')">コースター画像を保存</button>
+          </div>
+
+          <!-- ハンドストラップ -->
+          <div class="preview-card">
+            <h3>ハンドストラップ</h3>
+            <div class="preview-canvas-wrapper">
+              <canvas id="strap-canvas"></canvas>
+            </div>
+            <button class="secondary download-btn" onclick="downloadPreview('strap-canvas', 'hanaori_strap.png')">ストラップ画像を保存</button>
+          </div>
+
+          <!-- しおり -->
+          <div class="preview-card">
+            <h3>しおり</h3>
+            <div class="preview-canvas-wrapper">
+              <canvas id="bookmark-canvas"></canvas>
+            </div>
+            <button class="secondary download-btn" onclick="downloadPreview('bookmark-canvas', 'hanaori_bookmark.png')">しおり画像を保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
