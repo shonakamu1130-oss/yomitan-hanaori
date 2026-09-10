@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,7 +47,7 @@
       background: var(--panel-bg);
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       flex: 1 1 320px;
       min-width: 280px;
       max-width: 380px;
@@ -71,7 +72,8 @@
       font-weight: bold;
     }
 
-    input[type="number"], input[type="color"] {
+    input[type="number"],
+    input[type="color"] {
       padding: 6px 8px;
       border: 1px solid #ccc;
       border-radius: 4px;
@@ -119,7 +121,7 @@
       height: 32px;
       border-radius: 50%;
       border: 2px solid #ccc;
-      box-shadow: inset 0 0 2px rgba(0,0,0,0.2);
+      box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.2);
       transition: transform 0.1s, border-color 0.1s;
     }
 
@@ -187,7 +189,7 @@
       background: var(--panel-bg);
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       overflow: auto;
       flex: 2 1 400px;
       max-width: 100%;
@@ -195,7 +197,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      touch-action: none; /* ドロー操作時の標準スクロールを防止 */
+      touch-action: none;
+      /* ドロー操作時の標準スクロールを防止 */
       box-sizing: border-box;
     }
 
@@ -278,14 +281,21 @@
       max-height: 90vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
       overflow: hidden;
       animation: modalFadeIn 0.25s ease-out;
     }
 
     @keyframes modalFadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
 
     .modal-header {
@@ -332,7 +342,7 @@
       background: #ffffff;
       border-radius: 10px;
       padding: 15px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -366,7 +376,7 @@
     .preview-canvas-wrapper canvas {
       max-width: 100%;
       height: auto;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
     }
 
     .download-btn {
@@ -375,8 +385,52 @@
       padding: 8px 12px;
       min-height: 38px;
     }
+
+    /* ツールモード＆スタンプ選択CSS */
+    .tool-mode-group,
+    .stamp-btn-group {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .tool-btn,
+    .stamp-select-btn {
+      flex: 1;
+      padding: 8px 4px;
+      font-size: 0.85rem;
+      min-height: 42px;
+      background-color: #eee;
+      color: #333;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.15s ease;
+      margin-top: 0;
+      line-height: 1.2;
+    }
+
+    .tool-btn:hover,
+    .stamp-select-btn:hover {
+      background-color: #ddd;
+    }
+
+    .tool-btn.active,
+    .stamp-select-btn.active {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-hover);
+      box-shadow: 0 2px 4px rgba(139, 38, 62, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
   </style>
 </head>
+
 <body>
 
   <h1>読谷山花織 ドット絵デザインツール</h1>
@@ -387,11 +441,11 @@
       <!-- 1. マス目の数とサイズ設定 -->
       <div class="control-group">
         <h2>1. マス数・サイズ設定</h2>
-        
+
         <label>【マス目（グリッド）の数】</label>
         <div class="flex-row">
-          <label>横マス: <input type="number" id="grid-width" value="16" min="4" max="200"></label>
-          <label>縦マス: <input type="number" id="grid-height" value="16" min="4" max="200"></label>
+          <label>横マス: <input type="number" id="grid-width" value="32" min="4" max="200"></label>
+          <label>縦マス: <input type="number" id="grid-height" value="32" min="4" max="200"></label>
         </div>
         <button onclick="resizeCanvasGrid()">マス数を変更（リセット）</button>
 
@@ -399,8 +453,10 @@
 
         <label>【1マスの縦横比（形状）設定】</label>
         <div class="flex-row">
-          <label>横幅(px): <input type="number" id="cell-w" value="20" min="2" max="100" onchange="updateCellRatio()"></label>
-          <label>縦幅(px): <input type="number" id="cell-h" value="20" min="2" max="100" onchange="updateCellRatio()"></label>
+          <label>横幅(px): <input type="number" id="cell-w" value="20" min="2" max="100"
+              onchange="updateCellRatio()"></label>
+          <label>縦幅(px): <input type="number" id="cell-h" value="20" min="2" max="100"
+              onchange="updateCellRatio()"></label>
         </div>
       </div>
 
@@ -411,7 +467,7 @@
           <input type="color" id="base-color" value="#f2efe9">
           <span style="font-size:0.8rem;">カスタム色</span>
         </div>
-        
+
         <label>基本パレット:</label>
         <div class="color-palette-group" id="base-palette"></div>
 
@@ -421,18 +477,36 @@
       <!-- 3. ドット色（花糸）＆ ツール選択 -->
       <div class="control-group">
         <h2>3. 塗る色（花糸）＆ ツール</h2>
-        <div class="flex-row">
-          <input type="color" id="draw-color" value="#8b263e" onchange="disableEraser()">
+
+        <!-- ツールモード選択ボタン -->
+        <label>描画ツール選択:</label>
+        <div class="tool-mode-group">
+          <button type="button" id="tool-pen-btn" class="tool-btn active" onclick="setToolMode('pen')">✏️ ペン</button>
+          <button type="button" id="tool-eraser-btn" class="tool-btn" onclick="setToolMode('eraser')">🧹 消しゴム</button>
+          <button type="button" id="tool-stamp-btn" class="tool-btn" onclick="setToolMode('stamp')">🌸 スタンプ</button>
+        </div>
+
+        <!-- スタンプ選択パネル -->
+        <div id="stamp-selector-container"
+          style="display: none; margin-top: 8px; padding: 10px; background: #fdfbf7; border: 1px dashed var(--primary-color); border-radius: 6px;">
+          <label style="margin-bottom: 6px;">伝統花紋スタンプを選択:</label>
+          <div class="stamp-btn-group">
+            <button type="button" id="stamp-kajimaya-btn" class="stamp-select-btn active"
+              onclick="selectStampType('kajimaya')">🌸 風車花<br><small>(カジマヤー)</small></button>
+            <button type="button" id="stamp-jin-btn" class="stamp-select-btn" onclick="selectStampType('jin')">🪙
+              銭花<br><small>(ジンバナ)</small></button>
+            <button type="button" id="stamp-oji-btn" class="stamp-select-btn" onclick="selectStampType('oji')">🪭
+              扇花<br><small>(オージバナ)</small></button>
+          </div>
+        </div>
+
+        <div class="flex-row" style="margin-top: 10px;">
+          <input type="color" id="draw-color" value="#8b263e">
           <span style="font-size:0.8rem;">カスタム色</span>
         </div>
 
         <label>基本パレット:</label>
         <div class="color-palette-group" id="draw-palette"></div>
-
-        <!-- 消しゴムボタン -->
-        <button id="eraser-btn" class="eraser-btn" onclick="toggleEraser()">
-          <span>🧹 消しゴムモード (OFF)</span>
-        </button>
       </div>
 
       <!-- 4. 保存・読み込み -->
@@ -449,6 +523,14 @@
     <!-- 描画キャンバス -->
     <div class="canvas-container">
       <canvas id="grid-canvas" class="draw-mode"></canvas>
+    </div>
+
+    <!-- Undo / Redo ボタン -->
+    <div class="control-group">
+      <div class="flex-row" style="gap: 8px; margin-bottom: 0;">
+        <button id="undo-btn" class="secondary" onclick="undo()" disabled style="flex: 1; margin: 0;">↩️ １つ戻す</button>
+        <button id="redo-btn" class="secondary" onclick="redo()" disabled style="flex: 1; margin: 0;">↪️ やりなおす</button>
+      </div>
     </div>
   </div>
 
@@ -470,18 +552,156 @@
     let cellH = 20;
     let gridData = [];
     let isMouseDown = false;
-    let isEraserMode = false;
+
+    // ツール＆スタンプ用ステート
+    let currentTool = 'pen'; // 'pen', 'eraser', 'stamp'
+    let selectedStamp = 'kajimaya'; // 'kajimaya', 'jin', 'oji'
+    let hoverCell = null; // { r, c }
+
+    // Undo / Redo 履歴管理スタック
+    let historyStack = [];
+    let redoStack = [];
+    const MAX_HISTORY = 50;
+
+    // 伝統花紋スタンプ定義（中心からの相対座標: dr, dc）
+    const stamps = {
+      kajimaya: {
+        name: "カジマヤーバナ＜風車花＞",
+        pattern: [
+          { dr: -3, dc: -3 }, { dr: -3, dc: 3 },
+          { dr: -2, dc: -2 }, { dr: -2, dc: 2 },
+          { dr: -1, dc: -1 }, { dr: -1, dc: 1 },
+          { dr: 0, dc: 0 },
+          { dr: 1, dc: -1 }, { dr: 1, dc: 1 },
+          { dr: 2, dc: -2 }, { dr: 2, dc: 2 },
+          { dr: 3, dc: -3 }, { dr: 3, dc: 3 }
+        ]
+      },
+      jin: {
+        name: "ジンバナ＜銭花＞",
+        pattern: [
+          { dr: -3, dc: -1 }, { dr: -3, dc: 1 },
+          { dr: -2, dc: -2 }, { dr: -2, dc: 2 },
+          { dr: 0, dc: 0 },
+          { dr: 2, dc: -2 }, { dr: 2, dc: 2 },
+          { dr: 3, dc: -1 }, { dr: 3, dc: 1 }
+        ]
+      },
+      oji: {
+        name: "オージバナ＜扇花＞",
+        pattern: [
+          { dr: -2, dc: -4 }, { dr: -2, dc: -2 }, { dr: -2, dc: 0 }, { dr: -2, dc: 2 }, { dr: -2, dc: 4 },
+          { dr: -1, dc: -3 }, { dr: -1, dc: -1 }, { dr: -1, dc: 1 }, { dr: -1, dc: 3 },
+          { dr: 0, dc: -2 }, { dr: 0, dc: 0 }, { dr: 0, dc: 2 },
+          { dr: 1, dc: -1 }, { dr: 1, dc: 1 },
+          { dr: 2, dc: 0 }
+        ]
+      }
+    };
 
     const canvas = document.getElementById('grid-canvas');
     const ctx = canvas.getContext('2d');
     const drawColorInput = document.getElementById('draw-color');
     const baseColorInput = document.getElementById('base-color');
-    const eraserBtn = document.getElementById('eraser-btn');
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
 
     window.onload = () => {
       buildPalettes();
       initGrid();
+      setupKeyboardShortcuts();
     };
+
+    // 履歴保存 (Undo/Redo)
+    function saveState() {
+      const copy = gridData.map(row => [...row]);
+      historyStack.push(copy);
+      if (historyStack.length > MAX_HISTORY) {
+        historyStack.shift();
+      }
+      redoStack = [];
+      updateHistoryButtons();
+    }
+
+    function undo() {
+      if (historyStack.length === 0) return;
+      const currentCopy = gridData.map(row => [...row]);
+      redoStack.push(currentCopy);
+
+      gridData = historyStack.pop();
+      cols = gridData[0].length;
+      rows = gridData.length;
+      document.getElementById('grid-width').value = cols;
+      document.getElementById('grid-height').value = rows;
+
+      renderCanvas();
+      updateHistoryButtons();
+    }
+
+    function redo() {
+      if (redoStack.length === 0) return;
+      const currentCopy = gridData.map(row => [...row]);
+      historyStack.push(currentCopy);
+
+      gridData = redoStack.pop();
+      cols = gridData[0].length;
+      rows = gridData.length;
+      document.getElementById('grid-width').value = cols;
+      document.getElementById('grid-height').value = rows;
+
+      renderCanvas();
+      updateHistoryButtons();
+    }
+
+    function updateHistoryButtons() {
+      if (undoBtn) undoBtn.disabled = (historyStack.length === 0);
+      if (redoBtn) redoBtn.disabled = (redoStack.length === 0);
+    }
+
+    function setupKeyboardShortcuts() {
+      window.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+          if (e.shiftKey) {
+            redo();
+          } else {
+            undo();
+          }
+          e.preventDefault();
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+          redo();
+          e.preventDefault();
+        }
+      });
+    }
+
+    // ツールモード＆スタンプ選択
+    function setToolMode(mode) {
+      currentTool = mode;
+      document.getElementById('tool-pen-btn').classList.toggle('active', mode === 'pen');
+      document.getElementById('tool-eraser-btn').classList.toggle('active', mode === 'eraser');
+      document.getElementById('tool-stamp-btn').classList.toggle('active', mode === 'stamp');
+
+      const stampContainer = document.getElementById('stamp-selector-container');
+      if (stampContainer) {
+        stampContainer.style.display = (mode === 'stamp') ? 'block' : 'none';
+      }
+
+      if (mode === 'eraser') {
+        canvas.className = 'eraser-mode';
+      } else {
+        canvas.className = 'draw-mode';
+      }
+      renderCanvas();
+    }
+
+    function selectStampType(stampKey) {
+      selectedStamp = stampKey;
+      document.getElementById('stamp-kajimaya-btn').classList.toggle('active', stampKey === 'kajimaya');
+      document.getElementById('stamp-jin-btn').classList.toggle('active', stampKey === 'jin');
+      document.getElementById('stamp-oji-btn').classList.toggle('active', stampKey === 'oji');
+      renderCanvas();
+    }
 
     // パレットのUI生成
     function buildPalettes() {
@@ -489,14 +709,12 @@
       const drawContainer = document.getElementById('draw-palette');
 
       presetColors.forEach(c => {
-        // ベース色用
         const bItem = document.createElement('div');
         bItem.className = 'color-swatch-wrapper';
         bItem.innerHTML = `<div class="color-swatch" style="background:${c.hex}" title="${c.name}"></div>`;
         bItem.onclick = () => { baseColorInput.value = c.hex; };
         baseContainer.appendChild(bItem);
 
-        // デザイン色用
         const dItem = document.createElement('div');
         dItem.className = 'color-swatch-wrapper';
         dItem.innerHTML = `<div class="color-swatch" style="background:${c.hex}" title="${c.name}"></div>`;
@@ -532,6 +750,25 @@
           ctx.strokeRect(c * cellW, r * cellH, cellW, cellH);
         }
       }
+
+      // スタンプホバープレビューの描画（半透明）
+      if (currentTool === 'stamp' && hoverCell && stamps[selectedStamp]) {
+        const stampDef = stamps[selectedStamp];
+        ctx.save();
+        ctx.globalAlpha = 0.6;
+        ctx.fillStyle = drawColorInput.value;
+        stampDef.pattern.forEach(pt => {
+          const r = hoverCell.r + pt.dr;
+          const c = hoverCell.c + pt.dc;
+          if (r >= 0 && r < rows && c >= 0 && c < cols) {
+            ctx.fillRect(c * cellW, r * cellH, cellW, cellH);
+            ctx.strokeStyle = '#8b263e';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(c * cellW, r * cellH, cellW, cellH);
+          }
+        });
+        ctx.restore();
+      }
     }
 
     function updateCellRatio() {
@@ -540,17 +777,43 @@
       renderCanvas();
     }
 
-    // 塗る・消す（座標計算・セル描画）
+    // 塗る・消す・スタンプ捺印
     function paintCellFromPos(x, y) {
       const c = Math.floor(x / cellW);
       const r = Math.floor(y / cellH);
 
       if (r >= 0 && r < rows && c >= 0 && c < cols) {
-        const targetColor = isEraserMode ? baseColorInput.value : drawColorInput.value;
-        if (gridData[r][c] !== targetColor) {
-          gridData[r][c] = targetColor;
-          renderCanvas();
+        if (currentTool === 'stamp') {
+          paintStamp(r, c);
+        } else {
+          const targetColor = (currentTool === 'eraser') ? baseColorInput.value : drawColorInput.value;
+          if (gridData[r][c] !== targetColor) {
+            gridData[r][c] = targetColor;
+            renderCanvas();
+          }
         }
+      }
+    }
+
+    function paintStamp(centerR, centerC) {
+      const stampDef = stamps[selectedStamp];
+      if (!stampDef) return;
+      const targetColor = drawColorInput.value;
+      let changed = false;
+
+      stampDef.pattern.forEach(pt => {
+        const r = centerR + pt.dr;
+        const c = centerC + pt.dc;
+        if (r >= 0 && r < rows && c >= 0 && c < cols) {
+          if (gridData[r][c] !== targetColor) {
+            gridData[r][c] = targetColor;
+            changed = true;
+          }
+        }
+      });
+
+      if (changed) {
+        renderCanvas();
       }
     }
 
@@ -574,43 +837,52 @@
       }
     }
 
-    // 消しゴム切り替え
-    function toggleEraser() {
-      isEraserMode = !isEraserMode;
-      if (isEraserMode) {
-        eraserBtn.classList.add('active');
-        eraserBtn.innerHTML = '<span>🧹 消しゴムモード (ON)</span>';
-        canvas.className = 'eraser-mode';
-      } else {
-        disableEraser();
+    function setDrawColor(color) {
+      drawColorInput.value = color;
+      if (currentTool === 'eraser') {
+        setToolMode('pen');
       }
     }
 
-    function disableEraser() {
-      isEraserMode = false;
-      eraserBtn.classList.remove('active');
-      eraserBtn.innerHTML = '<span>🧹 消しゴムモード (OFF)</span>';
-      canvas.className = 'draw-mode';
-    }
-
-    function setDrawColor(color) {
-      drawColorInput.value = color;
-      disableEraser(); // 色選択で自動的に消しゴム解除
-    }
-
-    // イベントリスナー（マウス & タッチ操作対応）
+    // マウス / タッチ / ホバー イベントリスナー
     canvas.addEventListener('mousedown', (e) => {
+      saveState();
       isMouseDown = true;
       paintCell(e);
     });
+
     canvas.addEventListener('mousemove', (e) => {
-      if (isMouseDown) paintCell(e);
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
+      const c = Math.floor(x / cellW);
+      const r = Math.floor(y / cellH);
+
+      if (r >= 0 && r < rows && c >= 0 && c < cols) {
+        hoverCell = { r, c };
+      } else {
+        hoverCell = null;
+      }
+
+      if (isMouseDown) {
+        paintCell(e);
+      } else if (currentTool === 'stamp') {
+        renderCanvas();
+      }
     });
+
+    canvas.addEventListener('mouseleave', () => {
+      hoverCell = null;
+      if (currentTool === 'stamp') renderCanvas();
+    });
+
     window.addEventListener('mouseup', () => isMouseDown = false);
 
-    // タッチ操作リスナー（スマホ・タブレット用）
     canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
+      saveState();
       isMouseDown = true;
       paintCell(e);
     }, { passive: false });
@@ -627,6 +899,7 @@
 
     function resizeCanvasGrid() {
       if (confirm("マス数変更を行うと現在のデザインがリセットされます。よろしいですか？")) {
+        saveState();
         initGrid();
       }
     }
@@ -634,6 +907,7 @@
     function applyBaseColor() {
       const baseColor = baseColorInput.value;
       if (confirm("すべてのマスを現在設定されているベース色で塗りつぶしますか？")) {
+        saveState();
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
             gridData[r][c] = baseColor;
@@ -667,7 +941,7 @@
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         try {
           const data = JSON.parse(e.target.result);
           cols = data.cols;
@@ -676,7 +950,7 @@
           cellH = data.cellH || 20;
           gridData = data.gridData;
 
-          if(data.baseColor) baseColorInput.value = data.baseColor;
+          if (data.baseColor) baseColorInput.value = data.baseColor;
           document.getElementById('grid-width').value = cols;
           document.getElementById('grid-height').value = rows;
           document.getElementById('cell-w').value = cellW;
@@ -815,7 +1089,7 @@
       const innerW = w - innerMargin * 2;
       const innerH = h - innerMargin * 2;
       const pattern = cCtx.createPattern(patternCanvas, 'repeat');
-      
+
       cCtx.save();
       cCtx.translate(x + innerMargin, y + innerMargin);
       const scaleX = (innerW / 2) / patternCanvas.width;
@@ -978,7 +1252,8 @@
         <button class="modal-close-btn" onclick="closePreviewModal()">&times;</button>
       </div>
       <div class="modal-body">
-        <div style="font-size: 0.8rem; color: #333; background: #eef4f4; border: 1px solid #b2d3d3; padding: 8px 12px; border-radius: 6px; margin-bottom: 15px; text-align: center;">
+        <div
+          style="font-size: 0.8rem; color: #333; background: #eef4f4; border: 1px solid #b2d3d3; padding: 8px 12px; border-radius: 6px; margin-bottom: 15px; text-align: center;">
           💡 <strong>スマホで「写真」アプリに保存：</strong>「画像を保存」ボタンを押して表示されるメニューから「画像を保存」を選択するか、画像を長押ししてください。
         </div>
         <div class="preview-grid">
@@ -988,7 +1263,8 @@
             <div class="preview-canvas-wrapper">
               <canvas id="coaster-canvas"></canvas>
             </div>
-            <button class="secondary download-btn" onclick="downloadPreview('coaster-canvas', 'hanaori_coaster.png')">コースター画像を保存</button>
+            <button class="secondary download-btn"
+              onclick="downloadPreview('coaster-canvas', 'hanaori_coaster.png')">コースター画像を保存</button>
           </div>
 
           <!-- ハンドストラップ -->
@@ -997,7 +1273,8 @@
             <div class="preview-canvas-wrapper">
               <canvas id="strap-canvas"></canvas>
             </div>
-            <button class="secondary download-btn" onclick="downloadPreview('strap-canvas', 'hanaori_strap.png')">ストラップ画像を保存</button>
+            <button class="secondary download-btn"
+              onclick="downloadPreview('strap-canvas', 'hanaori_strap.png')">ストラップ画像を保存</button>
           </div>
 
           <!-- しおり -->
@@ -1006,11 +1283,13 @@
             <div class="preview-canvas-wrapper">
               <canvas id="bookmark-canvas"></canvas>
             </div>
-            <button class="secondary download-btn" onclick="downloadPreview('bookmark-canvas', 'hanaori_bookmark.png')">しおり画像を保存</button>
+            <button class="secondary download-btn"
+              onclick="downloadPreview('bookmark-canvas', 'hanaori_bookmark.png')">しおり画像を保存</button>
           </div>
         </div>
       </div>
     </div>
   </div>
 </body>
+
 </html>
